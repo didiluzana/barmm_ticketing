@@ -91,7 +91,7 @@ DATABASES = {
         "NAME": os.environ.get("PGDATABASE", "railway"),
         "USER": os.environ.get("PGUSER", "postgres"),
         "PASSWORD": os.environ.get("PGPASSWORD", "JxJWGyiELjnWiQZCMUOioSYjfDWztRZR"),
-        "HOST": os.environ.get("PGHOST", "postgres.railway.internal"),
+        "HOST": os.environ.get("PGHOST", "sakura.proxy.rlwy.net"),
         "PORT": os.environ.get("PGPORT", "5432"),
     }
 }
