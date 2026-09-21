@@ -69,7 +69,7 @@ def visible_tickets(user):
 
 # =========================================================
 # DASHBOARD
-# =========================================================@login_required
+@login_required
 def dashboard(request):
     qs = visible_tickets(request.user)
 
