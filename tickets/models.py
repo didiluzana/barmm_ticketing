@@ -29,6 +29,7 @@ class Province(models.Model):
 # USER
 # =========================================================
 
+
 class User(AbstractUser):
 
     class Role(models.TextChoices):
@@ -45,23 +46,30 @@ class User(AbstractUser):
     )
 
     province = models.ForeignKey(
-        Province,
+        "Province",
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
         related_name="users",
     )
 
-    def __str__(self):
+    # New users must change their temporary password
+    # before they can use the system.
+    must_change_password = models.BooleanField(
+        default=True,
+        help_text=(
+            "Require this user to change "
+            "their password before using the system."
+        ),
+    )
 
+    def __str__(self):
         full_name = self.get_full_name().strip()
 
         if full_name:
             return full_name
 
         return self.username
-
-
 # =========================================================
 # TICKET CATEGORY
 # =========================================================
