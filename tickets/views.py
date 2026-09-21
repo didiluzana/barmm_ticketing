@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import (
@@ -66,7 +67,74 @@ def visible_tickets(user):
 
     return qs.none()
 
+# =========================================================
+# CHANGE PASSWORD
+# =========================================================
 
+@login_required
+def change_password(request):
+
+    forced = getattr(
+        request.user,
+        "must_change_password",
+        False,
+    )
+
+    if request.method == "POST":
+
+        form = UserPasswordChangeForm(
+            user=request.user,
+            data=request.POST,
+        )
+
+        if form.is_valid():
+
+            user = form.save()
+
+            # The user has successfully replaced
+            # the temporary password.
+            user.must_change_password = False
+
+            user.save(
+                update_fields=[
+                    "must_change_password",
+                ]
+            )
+
+            # Password changes normally invalidate
+            # the current session. This keeps the
+            # user logged in.
+            update_session_auth_hash(
+                request,
+                user,
+            )
+
+            messages.success(
+                request,
+                "Your password has been changed successfully.",
+            )
+
+            return redirect(
+                "dashboard"
+            )
+
+    else:
+
+        form = UserPasswordChangeForm(
+            user=request.user
+        )
+
+    context = {
+        "form": form,
+        "forced": forced,
+    }
+
+    return render(
+        request,
+        "tickets/change_password.html",
+        context,
+    )
+    
 # =========================================================
 # DASHBOARD
 @login_required
