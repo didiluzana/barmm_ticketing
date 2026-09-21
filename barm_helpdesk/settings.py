@@ -4,7 +4,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "change-me-in-production"
 DEBUG = True
-ALLOWED_HOSTS = [""]
+ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = ['https://*.railway.app','https://barmm-tickets.net']
 
