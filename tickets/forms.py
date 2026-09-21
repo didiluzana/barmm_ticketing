@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.forms import PasswordChangeForm
 
 from .models import (
     Ticket,
@@ -211,3 +212,27 @@ class TicketActionForm(forms.Form):
                 "username",
             )
         )
+
+
+class UserPasswordChangeForm(PasswordChangeForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["old_password"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "Enter current password",
+            "autocomplete": "current-password",
+        })
+
+        self.fields["new_password1"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "Enter new password",
+            "autocomplete": "new-password",
+        })
+
+        self.fields["new_password2"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "Confirm new password",
+            "autocomplete": "new-password",
+        })
