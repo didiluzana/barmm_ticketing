@@ -607,6 +607,17 @@
 
                         </div>
 
+                        {% if user.is_authenticated %}
+
+    <a
+        href="{% url 'change_password' %}"
+        class="dropdown-item"
+    >
+        🔐 Change Password
+    </a>
+
+{% endif %}
+
                     </div>
 
 
