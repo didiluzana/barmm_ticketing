@@ -72,6 +72,10 @@ def visible_tickets(user):
 # CHANGE PASSWORD
 # =========================================================
 
+# =========================================================
+# CHANGE PASSWORD
+# =========================================================
+
 @login_required
 def change_password(request):
 
@@ -83,7 +87,7 @@ def change_password(request):
 
     if request.method == "POST":
 
-        form = UserPasswordChangeForm(
+        form = PasswordChangeForm(
             user=request.user,
             data=request.POST,
         )
@@ -92,8 +96,7 @@ def change_password(request):
 
             user = form.save()
 
-            # The user has successfully replaced
-            # the temporary password.
+            # Password has successfully been changed.
             user.must_change_password = False
 
             user.save(
@@ -102,9 +105,7 @@ def change_password(request):
                 ]
             )
 
-            # Password changes normally invalidate
-            # the current session. This keeps the
-            # user logged in.
+            # Keep user logged in after password change.
             update_session_auth_hash(
                 request,
                 user,
@@ -121,7 +122,7 @@ def change_password(request):
 
     else:
 
-        form = UserPasswordChangeForm(
+        form = PasswordChangeForm(
             user=request.user
         )
 
@@ -134,8 +135,7 @@ def change_password(request):
         request,
         "tickets/change_password.html",
         context,
-    )
-    
+    )    
 # =========================================================
 # DASHBOARD
 @login_required
