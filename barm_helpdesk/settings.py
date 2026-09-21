@@ -11,13 +11,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-in-production")
 
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = [
-    "barmmticketing-production.up.railway.app",
-    "barmm-tickets.net",
-    "www.barmm-tickets.net",
-    "localhost",
-    "127.0.0.1",
-]
+ALLOWED_HOSTS = ['*']
 
 # Railway may provide the deployment domain automatically.
 railway_domain = os.environ.get("RAILWAY_PUBLIC_DOMAIN")
