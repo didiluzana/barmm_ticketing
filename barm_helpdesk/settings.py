@@ -20,7 +20,10 @@ if railway_domain and railway_domain not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(railway_domain)
 
 
-CSRF_TRUSTED_ORIGINS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://barmmticketing-production.up.railway.app",
+    "https://barmm-tickets.net",
+    "https://www.barmm-tickets.net",
 ]
 
 if railway_domain:
