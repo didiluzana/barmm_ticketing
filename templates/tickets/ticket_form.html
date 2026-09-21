@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block title %}
+Log Call | BARM Digital
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .ticket-form-page {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .ticket-form-header {
+        background:
+            linear-gradient(
+                135deg,
+                var(--barm-green-darker),
+                var(--barm-green)
+            );
+
+        color: white;
+
+        padding: 22px;
+
+        border-radius: 16px;
+
+        border-bottom:
+            4px solid var(--barm-red);
+
+        box-shadow:
+            0 8px 24px
+            rgba(20, 90, 55, 0.15);
+
+        margin-bottom: 20px;
+    }
+
+    .ticket-form-header h1 {
+        font-size: 1.45rem;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+    .ticket-form-card {
+        border: 0;
+
+        border-radius: 16px;
+
+        overflow: hidden;
+
+        background: white;
+
+        box-shadow:
+            0 5px 20px
+            rgba(24, 70, 45, 0.07);
+
+        margin-bottom: 20px;
+    }
+
+    .ticket-form-card .card-header {
+        background: white;
+
+        border-bottom:
+            1px solid var(--barm-border);
+
+        padding: 16px 18px;
+
+        font-weight: 800;
+    }
+
+    .ticket-form-card .card-body {
+        padding: 20px;
+    }
+
+    .form-label {
+        font-weight: 700;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 44px;
+
+        border-radius: 10px;
+
+        border-color:
+            var(--barm-border);
+    }
+
+    textarea.form-control {
+        min-height: 130px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color:
+            var(--barm-green);
+
+        box-shadow:
+            0 0 0 0.2rem
+            rgba(25, 135, 84, 0.12);
+    }
+
+    .required-note {
+        background:
+            var(--barm-green-light);
+
+        border-left:
+            4px solid var(--barm-green);
+
+        border-radius: 10px;
+
+        padding: 11px 14px;
+
+        font-size: 0.88rem;
+
+        margin-bottom: 18px;
+    }
+
+    @media (max-width: 767.98px) {
+
+        .ticket-form-header {
+            padding: 18px;
+            border-radius: 13px;
+        }
+
+    }
+
+</style>
+
+
+<div class="ticket-form-page">
+
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div class="ticket-form-header">
+
+        <h1>
+
+            <i class="bi bi-telephone-plus me-2"></i>
+
+            Log New Call
+
+        </h1>
+
+        <div class="opacity-75">
+
+            Record the caller's reported issue
+            and create a support ticket.
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- FORM -->
+    <!-- ================================================= -->
+
+    <form
+        method="post"
+        id="ticketForm"
+    >
+
+        {% csrf_token %}
+
+
+        <div class="card ticket-form-card">
+
+            <div class="card-header">
+
+                <i
+                    class="
+                        bi
+                        bi-telephone-fill
+                        text-success
+                        me-2
+                    "
+                ></i>
+
+                Call Details
+
+            </div>
+
+
+            <div class="card-body">
+
+
+                <div class="required-note">
+
+                    <i
+                        class="
+                            bi
+                            bi-info-circle-fill
+                            me-1
+                        "
+                    ></i>
+
+                    Fields marked with
+
+                    <span class="text-danger fw-bold">
+                        *
+                    </span>
+
+                    are required.
+
+                    The ticket will automatically
+                    be recorded under your province.
+
+                </div>
+
+
+                {% if form.non_field_errors %}
+
+                    <div class="alert alert-danger">
+
+                        {% for error in form.non_field_errors %}
+
+                            <div>
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="row g-3">
+
+
+                    {% for field in form %}
+
+                        <div
+                            class="
+                                {% if field.name == 'description' %}
+                                    col-12
+                                {% else %}
+                                    col-12 col-md-6
+                                {% endif %}
+                            "
+                        >
+
+                            <label
+                                for="{{ field.id_for_label }}"
+                                class="form-label"
+                            >
+
+                                {{ field.label }}
+
+                                {% if field.field.required %}
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                {% endif %}
+
+                            </label>
+
+
+                            {{ field }}
+
+
+                            {% if field.help_text %}
+
+                                <div class="form-text">
+
+                                    {{ field.help_text }}
+
+                                </div>
+
+                            {% endif %}
+
+
+                            {% for error in field.errors %}
+
+                                <div
+                                    class="
+                                        text-danger
+                                        small
+                                        mt-1
+                                    "
+                                >
+
+                                    <i
+                                        class="
+                                            bi
+                                            bi-exclamation-circle
+                                            me-1
+                                        "
+                                    ></i>
+
+                                    {{ error }}
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endfor %}
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- BUTTONS -->
+        <!-- ================================================= -->
+
+        <div
+            class="
+                d-flex
+                flex-column-reverse
+                flex-sm-row
+                justify-content-between
+                gap-2
+            "
+        >
+
+            <a
+                href="{% url 'ticket_list' %}"
+                class="btn btn-outline-secondary"
+            >
+
+                <i class="bi bi-arrow-left me-1"></i>
+
+                Cancel
+
+            </a>
+
+
+            <button
+                type="submit"
+                class="btn btn-success px-4"
+            >
+
+                <i class="bi bi-save me-1"></i>
+
+                Create Ticket
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- APPLY BOOTSTRAP TO DJANGO FORM CONTROLS -->
+<!-- ===================================================== -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const form =
+            document.getElementById(
+                "ticketForm"
+            );
+
+
+        if (!form) {
+            return;
+        }
+
+
+        form
+            .querySelectorAll(
+                "input:not([type='hidden']):not([type='checkbox']):not([type='radio']), textarea"
+            )
+            .forEach(
+                function (element) {
+
+                    element.classList.add(
+                        "form-control"
+                    );
+
+                }
+            );
+
+
+        form
+            .querySelectorAll(
+                "select"
+            )
+            .forEach(
+                function (element) {
+
+                    element.classList.add(
+                        "form-select"
+                    );
+
+                }
+            );
+
+    }
+);
+
+</script>
+
+{% endblock %}

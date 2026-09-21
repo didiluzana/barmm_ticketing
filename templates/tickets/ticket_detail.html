@@ -1,0 +1,1580 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ ticket.ticket_no }} | BARM Digital
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+    .ticket-page {
+        max-width: 1450px;
+        margin: 0 auto;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .ticket-header {
+        background:
+            linear-gradient(
+                135deg,
+                var(--barm-green-darker),
+                var(--barm-green)
+            );
+
+        border-bottom:
+            4px solid var(--barm-red);
+
+        border-radius: 16px;
+
+        padding: 22px;
+
+        color: white;
+
+        box-shadow:
+            0 8px 24px rgba(20,90,55,0.15);
+
+        margin-bottom: 20px;
+    }
+
+
+    /* =====================================================
+       CARDS
+    ===================================================== */
+
+    .ticket-card {
+        border: 0;
+
+        border-radius: 15px;
+
+        overflow: hidden;
+
+        background: white;
+
+        box-shadow:
+            0 4px 18px rgba(24,70,45,0.06);
+
+        margin-bottom: 20px;
+    }
+
+
+    .ticket-card .card-header {
+        background: white;
+
+        border-bottom:
+            1px solid var(--barm-border);
+
+        padding: 15px 18px;
+
+        font-weight: 800;
+    }
+
+
+    .ticket-card .card-body {
+        padding: 18px;
+    }
+
+
+    /* =====================================================
+       DETAILS
+    ===================================================== */
+
+    .detail-box {
+        padding: 12px 0;
+
+        border-bottom:
+            1px solid #edf1ef;
+    }
+
+
+    .detail-label {
+        font-size: 0.74rem;
+
+        text-transform: uppercase;
+
+        color: var(--barm-muted);
+
+        font-weight: 800;
+
+        letter-spacing: 0.4px;
+
+        margin-bottom: 4px;
+    }
+
+
+    .detail-value {
+        color: var(--barm-text);
+
+        font-weight: 600;
+    }
+
+
+    .description-box {
+        background: #f6f9f7;
+
+        border-left:
+            4px solid var(--barm-green);
+
+        border-radius: 11px;
+
+        padding: 15px;
+
+        line-height: 1.6;
+    }
+
+
+    /* =====================================================
+       UPDATE PANEL
+    ===================================================== */
+
+    .update-panel {
+        position: sticky;
+
+        top: 15px;
+    }
+
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+
+        min-height: 44px;
+
+        border-color: var(--barm-border);
+    }
+
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--barm-green);
+
+        box-shadow:
+            0 0 0 0.2rem rgba(25,135,84,0.12);
+    }
+
+
+    textarea.form-control {
+        min-height: 110px;
+    }
+
+
+    /* =====================================================
+       STATUS HISTORY
+    ===================================================== */
+
+    .status-history-table {
+        min-width: 1000px;
+    }
+
+
+    .status-history-table th {
+        background: #f6f9f7;
+
+        color: #4c5952;
+
+        font-size: 0.76rem;
+
+        font-weight: 800;
+
+        text-transform: uppercase;
+
+        white-space: nowrap;
+    }
+
+
+    .status-history-table td,
+    .status-history-table th {
+        padding: 12px 14px;
+
+        vertical-align: middle;
+    }
+
+
+    .status-history-table td {
+        border-bottom:
+            1px solid #edf1ef;
+    }
+
+
+    .history-user-icon {
+        width: 34px;
+        height: 34px;
+
+        border-radius: 50%;
+
+        background: var(--barm-green-light);
+
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        margin-right: 8px;
+
+        color: var(--barm-green);
+    }
+
+
+    /* =====================================================
+       TIMELINE
+    ===================================================== */
+
+    .timeline {
+        position: relative;
+
+        padding-left: 30px;
+    }
+
+
+    .timeline::before {
+        content: "";
+
+        position: absolute;
+
+        left: 9px;
+
+        top: 5px;
+        bottom: 5px;
+
+        width: 2px;
+
+        background: #d8e2dc;
+    }
+
+
+    .timeline-item {
+        position: relative;
+
+        padding: 14px;
+
+        background: #f7faf8;
+
+        border-radius: 12px;
+
+        margin-bottom: 15px;
+
+        border-left:
+            3px solid var(--barm-green);
+    }
+
+
+    .timeline-item::before {
+        content: "";
+
+        position: absolute;
+
+        left: -28px;
+
+        top: 18px;
+
+        width: 12px;
+        height: 12px;
+
+        border-radius: 50%;
+
+        background: var(--barm-green);
+
+        border: 3px solid white;
+
+        box-shadow:
+            0 0 0 2px var(--barm-green);
+    }
+
+
+    @media (max-width: 991.98px) {
+
+        .update-panel {
+            position: static;
+        }
+
+    }
+
+
+    @media (max-width: 767.98px) {
+
+        .ticket-header {
+            padding: 18px;
+
+            border-radius: 13px;
+        }
+
+
+        .ticket-header-actions {
+            width: 100%;
+        }
+
+
+        .ticket-header-actions .btn {
+            width: 100%;
+        }
+
+
+        .ticket-card {
+            border-radius: 12px;
+        }
+
+    }
+
+</style>
+
+
+<div class="ticket-page">
+
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div class="ticket-header">
+
+        <div
+            class="
+                d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+            "
+        >
+
+            <div>
+
+                <h3 class="mb-1 fw-bold">
+
+                    <i class="bi bi-ticket-perforated me-2"></i>
+
+                    {{ ticket.ticket_no }}
+
+                </h3>
+
+
+                <div class="mb-3 opacity-75">
+
+                    {{ ticket.subject }}
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                {% if ticket.status == "REOPENED" %}
+
+                    <span
+                        class="
+                            badge
+                            bg-danger
+                            px-3
+                            py-2
+                        "
+                    >
+
+                        Reopened
+
+                    </span>
+
+
+                {% elif ticket.status == "CLOSED" %}
+
+                    <span
+                        class="
+                            badge
+                            bg-dark
+                            px-3
+                            py-2
+                        "
+                    >
+
+                        Closed
+
+                    </span>
+
+
+                {% elif ticket.status == "PENDING" %}
+
+                    <span
+                        class="
+                            badge
+                            bg-light
+                            text-dark
+                            px-3
+                            py-2
+                        "
+                    >
+
+                        Pending
+
+                    </span>
+
+
+                {% else %}
+
+                    <span
+                        class="
+                            badge
+                            bg-success
+                            px-3
+                            py-2
+                        "
+                    >
+
+                        {{ ticket.get_status_display }}
+
+                    </span>
+
+                {% endif %}
+
+
+                <!-- PRIORITY -->
+
+                {% if ticket.priority == "CRITICAL" or ticket.priority == "HIGH" %}
+
+                    <span
+                        class="
+                            badge
+                            bg-danger
+                            ms-1
+                            px-3
+                            py-2
+                        "
+                    >
+
+                        {{ ticket.get_priority_display }} Priority
+
+                    </span>
+
+                {% else %}
+
+                    <span
+                        class="
+                            badge
+                            bg-light
+                            text-dark
+                            ms-1
+                            px-3
+                            py-2
+                        "
+                    >
+
+                        {{ ticket.get_priority_display }} Priority
+
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="ticket-header-actions">
+
+                <a
+                    href="{% url 'ticket_list' %}"
+                    class="btn btn-light"
+                >
+
+                    <i class="bi bi-arrow-left me-1"></i>
+
+                    Back to Tickets
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- MAIN -->
+    <!-- ================================================= -->
+
+    <div class="row g-3">
+
+
+        <!-- LEFT -->
+
+        <div class="col-12 col-lg-8">
+
+            <div class="card ticket-card">
+
+                <div class="card-header">
+
+                    <i
+                        class="
+                            bi
+                            bi-telephone-fill
+                            text-primary
+                            me-2
+                        "
+                    ></i>
+
+                    Ticket Information
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="row">
+
+
+                        <div class="col-6 col-md-4">
+
+                            <div class="detail-box">
+
+                                <div class="detail-label">
+                                    Status
+                                </div>
+
+                                <div class="detail-value">
+
+                                    {{ ticket.get_status_display }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6 col-md-4">
+
+                            <div class="detail-box">
+
+                                <div class="detail-label">
+                                    Priority
+                                </div>
+
+                                <div class="detail-value">
+
+                                    {{ ticket.get_priority_display }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="detail-box">
+
+                                <div class="detail-label">
+                                    Category
+                                </div>
+
+                                <div class="detail-value">
+
+                                    {{ ticket.category }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6 col-md-4">
+
+                            <div class="detail-box">
+
+                                <div class="detail-label">
+                                    Province
+                                </div>
+
+                                <div class="detail-value">
+
+                                    <i
+                                        class="
+                                            bi
+                                            bi-geo-alt
+                                            text-success
+                                            me-1
+                                        "
+                                    ></i>
+
+                                    {{ ticket.province }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6 col-md-8">
+
+                            <div class="detail-box">
+
+                                <div class="detail-label">
+                                    Site / Location
+                                </div>
+
+                                <div class="detail-value">
+
+                                    {{ ticket.site_location }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="detail-box">
+
+                                <div class="detail-label">
+                                    Caller
+                                </div>
+
+                                <div class="detail-value">
+
+                                    <i class="bi bi-person me-1"></i>
+
+                                    {{ ticket.caller_name }}
+
+
+                                    {% if ticket.caller_contact %}
+
+                                        <div class="mt-1">
+
+                                            <a
+                                                href="tel:{{ ticket.caller_contact }}"
+                                                class="text-decoration-none"
+                                            >
+
+                                                <i class="bi bi-telephone me-1"></i>
+
+                                                {{ ticket.caller_contact }}
+
+                                            </a>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="detail-box">
+
+                                <div class="detail-label">
+                                    Currently Assigned To
+                                </div>
+
+
+                                <div class="detail-value">
+
+                                    {% if ticket.assigned_to %}
+
+                                        <i
+                                            class="
+                                                bi
+                                                bi-person-check-fill
+                                                text-success
+                                                me-1
+                                            "
+                                        ></i>
+
+
+                                        {% if ticket.assigned_to.get_full_name %}
+
+                                            {{ ticket.assigned_to.get_full_name }}
+
+                                        {% else %}
+
+                                            {{ ticket.assigned_to.username }}
+
+                                        {% endif %}
+
+
+                                        {% if ticket.assigned_to.role %}
+
+                                            <div class="small text-muted">
+
+                                                {{ ticket.assigned_to.get_role_display }}
+
+                                            </div>
+
+                                        {% endif %}
+
+
+                                    {% else %}
+
+                                        <span class="text-danger">
+
+                                            <i class="bi bi-person-x me-1"></i>
+
+                                            Unassigned
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="detail-box">
+
+                                <div class="detail-label">
+                                    Logged By
+                                </div>
+
+                                <div class="detail-value">
+
+                                    <i class="bi bi-headset me-1"></i>
+
+                                    {{ ticket.logged_by }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="detail-box">
+
+                                <div class="detail-label">
+                                    Date Logged
+                                </div>
+
+                                <div class="detail-value">
+
+                                    {{ ticket.created_at|date:"M d, Y h:i A" }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mt-4">
+
+                        <h6 class="fw-bold">
+
+                            <i class="bi bi-card-text me-1"></i>
+
+                            Description
+
+                        </h6>
+
+
+                        <div class="description-box">
+
+                            {% if ticket.description %}
+
+                                {{ ticket.description|linebreaksbr }}
+
+                            {% else %}
+
+                                <span class="text-muted">
+
+                                    No description provided.
+
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- UPDATE -->
+
+        <div class="col-12 col-lg-4">
+
+            <div class="card ticket-card update-panel">
+
+                <div class="card-header">
+
+                    <i
+                        class="
+                            bi
+                            bi-pencil-square
+                            text-primary
+                            me-2
+                        "
+                    ></i>
+
+                    Update Ticket
+
+                </div>
+
+
+                <div class="card-body">
+
+
+                    {% if ticket.status == "CLOSED" %}
+
+                        <div class="alert alert-success">
+
+                            <i
+                                class="
+                                    bi
+                                    bi-check-circle-fill
+                                    me-1
+                                "
+                            ></i>
+
+                            <strong>
+                                Ticket Closed
+                            </strong>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <form
+                        method="post"
+                        id="ticketUpdateForm"
+                    >
+
+                        {% csrf_token %}
+
+
+                        {% for field in form %}
+
+                            <div class="mb-3">
+
+                                <label
+                                    for="{{ field.id_for_label }}"
+                                    class="form-label fw-semibold"
+                                >
+
+                                    {{ field.label }}
+
+                                </label>
+
+
+                                {{ field }}
+
+
+                                {% for error in field.errors %}
+
+                                    <div class="text-danger small mt-1">
+
+                                        {{ error }}
+
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endfor %}
+
+
+                        <button
+                            type="submit"
+                            class="
+                                btn
+                                btn-primary
+                                w-100
+                                py-2
+                            "
+                        >
+
+                            <i class="bi bi-save me-1"></i>
+
+                            Save Update
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- STATUS HISTORY -->
+    <!-- ================================================= -->
+
+    <div class="card ticket-card">
+
+        <div
+            class="
+                card-header
+                d-flex
+                justify-content-between
+                align-items-center
+            "
+        >
+
+            <span>
+
+                <i
+                    class="
+                        bi
+                        bi-clock-history
+                        text-primary
+                        me-2
+                    "
+                ></i>
+
+                Ticket Status History
+
+            </span>
+
+
+            <span class="badge bg-success">
+
+                {{ status_history|length }} Entries
+
+            </span>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+
+            {% if status_history %}
+
+                <div class="table-responsive">
+
+                    <table
+                        class="
+                            table
+                            table-hover
+                            mb-0
+                            status-history-table
+                        "
+                    >
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Date / Time</th>
+
+                                <th>Previous</th>
+
+                                <th>New Status</th>
+
+                                <th>Assigned To</th>
+
+                                <th>Changed By</th>
+
+                                <th>Remarks</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            {% for history in status_history %}
+
+                                <tr>
+
+
+                                    <!-- DATE -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+
+                                            {{ history.changed_at|date:"M d, Y" }}
+
+                                        </div>
+
+                                        <small class="text-muted">
+
+                                            {{ history.changed_at|date:"h:i A" }}
+
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- PREVIOUS -->
+
+                                    <td>
+
+                                        {% if history.old_status %}
+
+                                            {% if history.old_status == "REOPENED" %}
+
+                                                <span class="badge bg-danger">
+
+                                                    Reopened
+
+                                                </span>
+
+                                            {% elif history.old_status == "CLOSED" %}
+
+                                                <span class="badge bg-dark">
+
+                                                    Closed
+
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="badge bg-success">
+
+                                                    {% if history.old_status == "IN_PROGRESS" %}
+
+                                                        In Progress
+
+                                                    {% else %}
+
+                                                        {{ history.old_status|title }}
+
+                                                    {% endif %}
+
+                                                </span>
+
+                                            {% endif %}
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                —
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- NEW STATUS -->
+
+                                    <td>
+
+                                        {% if history.new_status == "REOPENED" %}
+
+                                            <span class="badge bg-danger">
+
+                                                Reopened
+
+                                            </span>
+
+
+                                        {% elif history.new_status == "CLOSED" %}
+
+                                            <span class="badge bg-dark">
+
+                                                Closed
+
+                                            </span>
+
+
+                                        {% elif history.new_status == "PENDING" %}
+
+                                            <span
+                                                class="
+                                                    badge
+                                                    bg-light
+                                                    text-dark
+                                                    border
+                                                "
+                                            >
+
+                                                Pending
+
+                                            </span>
+
+
+                                        {% else %}
+
+                                            <span class="badge bg-success">
+
+                                                {% if history.new_status == "IN_PROGRESS" %}
+
+                                                    In Progress
+
+                                                {% else %}
+
+                                                    {{ history.new_status|title }}
+
+                                                {% endif %}
+
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- ASSIGNED TO -->
+
+                                    <td>
+
+                                        {% if history.assigned_to %}
+
+                                            <div
+                                                class="
+                                                    d-flex
+                                                    align-items-center
+                                                "
+                                            >
+
+                                                <span class="history-user-icon">
+
+                                                    <i
+                                                        class="
+                                                            bi
+                                                            bi-person-check-fill
+                                                        "
+                                                    ></i>
+
+                                                </span>
+
+
+                                                <div>
+
+                                                    <div class="fw-semibold">
+
+                                                        {% if history.assigned_to.get_full_name %}
+
+                                                            {{ history.assigned_to.get_full_name }}
+
+                                                        {% else %}
+
+                                                            {{ history.assigned_to.username }}
+
+                                                        {% endif %}
+
+                                                    </div>
+
+
+                                                    {% if history.assigned_to.role %}
+
+                                                        <small class="text-muted">
+
+                                                            {{ history.assigned_to.get_role_display }}
+
+                                                        </small>
+
+                                                    {% endif %}
+
+                                                </div>
+
+                                            </div>
+
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+
+                                                <i
+                                                    class="
+                                                        bi
+                                                        bi-person-x
+                                                        me-1
+                                                    "
+                                                ></i>
+
+                                                Unassigned
+
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- CHANGED BY -->
+
+                                    <td>
+
+                                        {% if history.changed_by %}
+
+                                            <div class="fw-semibold">
+
+                                                <i
+                                                    class="
+                                                        bi
+                                                        bi-person-circle
+                                                        me-1
+                                                    "
+                                                ></i>
+
+
+                                                {% if history.changed_by.get_full_name %}
+
+                                                    {{ history.changed_by.get_full_name }}
+
+                                                {% else %}
+
+                                                    {{ history.changed_by.username }}
+
+                                                {% endif %}
+
+                                            </div>
+
+
+                                            {% if history.changed_by.role %}
+
+                                                <small class="text-muted">
+
+                                                    {{ history.changed_by.get_role_display }}
+
+                                                </small>
+
+                                            {% endif %}
+
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+
+                                                System
+
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- REMARKS -->
+
+                                    <td>
+
+                                        {% if history.remarks %}
+
+                                            {{ history.remarks|linebreaksbr }}
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                —
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                </tr>
+
+                            {% endfor %}
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <i
+                        class="
+                            bi
+                            bi-clock-history
+                            text-muted
+                        "
+                        style="font-size:2.5rem;"
+                    ></i>
+
+
+                    <p class="text-muted mt-2 mb-0">
+
+                        No status history recorded.
+
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- ACTIVITY HISTORY -->
+    <!-- ================================================= -->
+
+    <div class="card ticket-card">
+
+        <div class="card-header">
+
+            <i
+                class="
+                    bi
+                    bi-activity
+                    text-primary
+                    me-2
+                "
+            ></i>
+
+            Activity History
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            {% if activity_history %}
+
+                <div class="timeline">
+
+
+                    {% for update in activity_history %}
+
+                        <div class="timeline-item">
+
+
+                            <div
+                                class="
+                                    d-flex
+                                    flex-column
+                                    flex-md-row
+                                    justify-content-between
+                                    gap-1
+                                "
+                            >
+
+                                <strong>
+
+                                    <i
+                                        class="
+                                            bi
+                                            bi-person-circle
+                                            me-1
+                                        "
+                                    ></i>
+
+                                    {{ update.author }}
+
+                                </strong>
+
+
+                                <small class="text-muted">
+
+                                    <i class="bi bi-clock me-1"></i>
+
+                                    {{ update.created_at|date:"M d, Y h:i A" }}
+
+                                </small>
+
+                            </div>
+
+
+                            {% if update.old_status or update.new_status %}
+
+                                <div class="mt-2">
+
+                                    <span
+                                        class="
+                                            badge
+                                            bg-light
+                                            text-dark
+                                            border
+                                        "
+                                    >
+
+                                        {% if update.old_status %}
+
+                                            {{ update.old_status }}
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </span>
+
+
+                                    <i
+                                        class="
+                                            bi
+                                            bi-arrow-right
+                                            mx-1
+                                            text-muted
+                                        "
+                                    ></i>
+
+
+                                    <span class="badge bg-success">
+
+                                        {% if update.new_status %}
+
+                                            {{ update.new_status }}
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </span>
+
+                                </div>
+
+                            {% endif %}
+
+
+                            {% if update.note %}
+
+                                <div class="mt-2 text-secondary">
+
+                                    {{ update.note|linebreaksbr }}
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+            {% else %}
+
+                <div class="text-center py-4">
+
+                    <i
+                        class="
+                            bi
+                            bi-activity
+                            text-muted
+                        "
+                        style="font-size:2.3rem;"
+                    ></i>
+
+                    <p class="text-muted mt-2">
+
+                        No activity yet.
+
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const form =
+                document.getElementById(
+                    "ticketUpdateForm"
+                );
+
+
+            if (!form) {
+                return;
+            }
+
+
+            const normalInputs =
+                form.querySelectorAll(
+                    "input:not([type='checkbox']):not([type='radio']), textarea"
+                );
+
+
+            normalInputs.forEach(
+                function (input) {
+
+                    input.classList.add(
+                        "form-control"
+                    );
+
+                }
+            );
+
+
+            const selects =
+                form.querySelectorAll(
+                    "select"
+                );
+
+
+            selects.forEach(
+                function (select) {
+
+                    select.classList.add(
+                        "form-select"
+                    );
+
+                }
+            );
+
+
+            const checks =
+                form.querySelectorAll(
+                    "input[type='checkbox'], input[type='radio']"
+                );
+
+
+            checks.forEach(
+                function (input) {
+
+                    input.classList.add(
+                        "form-check-input"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+</script>
+
+{% endblock %}

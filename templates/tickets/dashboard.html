@@ -1,0 +1,2229 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard | BARM Digital
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    /* =====================================================
+       PAGE
+    ===================================================== */
+
+    .dashboard-page {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .dashboard-header {
+        background:
+            linear-gradient(
+                135deg,
+                var(--barm-green-darker),
+                var(--barm-green)
+            );
+
+        color: white;
+        border-radius: 16px;
+        border-bottom: 4px solid var(--barm-red);
+        padding: 22px;
+        margin-bottom: 20px;
+
+        box-shadow:
+            0 8px 24px
+            rgba(20, 90, 55, 0.15);
+    }
+
+
+    .dashboard-header h1 {
+        font-size: 1.55rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+
+    /* =====================================================
+       STAT CARDS
+    ===================================================== */
+
+    .stat-card {
+        border: 0;
+        border-radius: 14px;
+        background: white;
+
+        box-shadow:
+            0 4px 16px
+            rgba(24, 70, 45, 0.07);
+
+        height: 100%;
+
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+
+        box-shadow:
+            0 7px 22px
+            rgba(24, 70, 45, 0.12);
+    }
+
+
+    .stat-card .card-body {
+        padding: 18px;
+    }
+
+
+    .stat-label {
+        color: var(--barm-muted);
+        font-size: 0.76rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 5px;
+    }
+
+
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--barm-text);
+    }
+
+
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 12px;
+        font-size: 1.3rem;
+    }
+
+
+    .stat-icon.green {
+        color: var(--barm-green);
+        background: var(--barm-green-light);
+    }
+
+
+    .stat-icon.red {
+        color: var(--barm-red);
+        background: var(--barm-red-light);
+    }
+
+
+    /* =====================================================
+       FILTER / SEARCH CARD
+    ===================================================== */
+
+    .filter-card {
+        border: 0;
+        border-radius: 16px;
+        background: white;
+
+        box-shadow:
+            0 5px 20px
+            rgba(24, 70, 45, 0.07);
+
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+
+    .filter-card .card-body {
+        padding: 18px;
+    }
+
+
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+
+    .filter-btn {
+        border-radius: 10px;
+        font-weight: 700;
+        padding: 9px 15px;
+    }
+
+
+    .filter-btn.active-filter {
+        background: var(--barm-green);
+        border-color: var(--barm-green);
+        color: white;
+    }
+
+
+    .search-wrapper {
+        position: relative;
+    }
+
+
+    .search-wrapper .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+
+        transform: translateY(-50%);
+
+        color: #89938e;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+
+    .search-input {
+        min-height: 44px;
+        padding-left: 41px;
+        border-radius: 10px;
+    }
+
+
+    .search-input:focus {
+        border-color: var(--barm-green);
+
+        box-shadow:
+            0 0 0 0.2rem
+            rgba(25, 135, 84, 0.13);
+    }
+
+
+    /* =====================================================
+       TICKET CARD
+    ===================================================== */
+
+    .ticket-card {
+        border: 0;
+        border-radius: 16px;
+        overflow: hidden;
+        background: white;
+
+        box-shadow:
+            0 5px 20px
+            rgba(24, 70, 45, 0.07);
+
+        margin-top: 20px;
+    }
+
+
+    .ticket-card-header {
+        padding: 17px 20px;
+        background: white;
+        border-bottom: 3px solid var(--barm-red);
+    }
+
+
+    .ticket-card-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin: 0;
+        color: var(--barm-text);
+    }
+
+
+    .ticket-result-count {
+        background: var(--barm-green);
+        color: white;
+
+        border-radius: 20px;
+
+        padding: 6px 12px;
+
+        font-size: 0.78rem;
+        font-weight: 800;
+
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       TABLE WRAPPER
+    ===================================================== */
+
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+
+    /* =====================================================
+       TABLE
+    ===================================================== */
+
+    .ticket-table {
+        width: 100%;
+        min-width: 1380px;
+
+        margin: 0;
+
+        border-collapse: separate;
+        border-spacing: 0;
+
+        table-layout: auto;
+    }
+
+
+    .ticket-table thead th {
+        background: #f3f7f5;
+        color: #43524a;
+
+        font-size: 0.74rem;
+        font-weight: 800;
+
+        text-transform: uppercase;
+        letter-spacing: 0.25px;
+
+        white-space: nowrap;
+
+        padding: 14px 15px;
+
+        border-bottom:
+            2px solid
+            var(--barm-border);
+
+        vertical-align: middle;
+    }
+
+
+    .ticket-table tbody td {
+        padding: 15px;
+
+        vertical-align: middle;
+
+        border-bottom:
+            1px solid #e8eeeb;
+
+        font-size: 0.91rem;
+    }
+
+
+    .ticket-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+
+    /* =====================================================
+       COLUMN WIDTHS
+    ===================================================== */
+
+    .col-ticket {
+        min-width: 175px;
+        width: 175px;
+    }
+
+
+    .col-date {
+        min-width: 145px;
+        width: 145px;
+    }
+
+
+    .col-province {
+        min-width: 150px;
+        width: 150px;
+    }
+
+
+    .col-issue {
+        min-width: 300px;
+        width: 34%;
+    }
+
+
+    .col-priority {
+        min-width: 130px;
+        width: 130px;
+
+        text-align: center;
+    }
+
+
+    .col-status {
+        min-width: 150px;
+        width: 150px;
+
+        text-align: center;
+    }
+
+
+    .col-assigned {
+        min-width: 190px;
+        width: 190px;
+    }
+
+
+    .col-location {
+        min-width: 220px;
+        width: 220px;
+    }
+
+
+    /* =====================================================
+       ISSUE / DETAILS
+    ===================================================== */
+
+    .issue-category {
+        font-weight: 800;
+        color: var(--barm-text);
+        margin-bottom: 3px;
+    }
+
+
+    .issue-subject {
+        font-weight: 600;
+        color: #34423b;
+
+        line-height: 1.35;
+
+        margin-bottom: 4px;
+
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+
+    .issue-description {
+        display: block;
+
+        color: #6c757d;
+
+        font-size: 0.78rem;
+
+        line-height: 1.4;
+
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+
+    /* =====================================================
+       LOCATION
+    ===================================================== */
+
+    .location-cell {
+        line-height: 1.4;
+
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+
+    .location-icon {
+        color: var(--barm-green);
+        margin-right: 5px;
+    }
+
+
+    /* =====================================================
+       UNRESOLVED BLINK
+       Current speed: 3 seconds
+    ===================================================== */
+
+    @keyframes unresolvedBlink {
+
+        0% {
+            background-color: #ffffff;
+            color: inherit;
+        }
+
+        50% {
+            background-color: #dc3545;
+            color: #ffffff;
+        }
+
+        100% {
+            background-color: #ffffff;
+            color: inherit;
+        }
+
+    }
+
+
+    @keyframes unresolvedTextBlink {
+
+        0% {
+            color: inherit;
+        }
+
+        50% {
+            color: #ffffff;
+        }
+
+        100% {
+            color: inherit;
+        }
+
+    }
+
+
+    .unresolved-ticket-row td {
+        animation:
+            unresolvedBlink
+            5s
+            linear
+            infinite !important;
+    }
+
+
+    .unresolved-ticket-row td a,
+    .unresolved-ticket-row td small,
+    .unresolved-ticket-row td .text-muted,
+    .unresolved-ticket-row td .text-danger,
+    .unresolved-ticket-row td .text-success,
+    .unresolved-ticket-row td .issue-category,
+    .unresolved-ticket-row td .issue-subject,
+    .unresolved-ticket-row td .issue-description,
+    .unresolved-ticket-row td .location-icon {
+        animation:
+            unresolvedTextBlink
+            5s
+            linear
+            infinite !important;
+    }
+
+
+    .unresolved-ticket-row:hover td,
+    .unresolved-ticket-row:hover td a,
+    .unresolved-ticket-row:hover td small,
+    .unresolved-ticket-row:hover td .text-muted,
+    .unresolved-ticket-row:hover td .text-danger,
+    .unresolved-ticket-row:hover td .text-success,
+    .unresolved-ticket-row:hover td .issue-category,
+    .unresolved-ticket-row:hover td .issue-subject,
+    .unresolved-ticket-row:hover td .issue-description,
+    .unresolved-ticket-row:hover td .location-icon {
+        animation-play-state: paused !important;
+    }
+
+
+    .unresolved-ticket-row:hover td {
+        background: #fff4f5 !important;
+        color: var(--barm-text) !important;
+    }
+
+
+    /* =====================================================
+       NORMAL ROW HOVER
+    ===================================================== */
+
+    .ticket-table tbody tr:not(.unresolved-ticket-row):hover td {
+        background: #f8fbf9;
+    }
+
+
+    /* =====================================================
+       TICKET LINK
+    ===================================================== */
+
+    .ticket-number-link {
+        color: var(--barm-green-dark);
+
+        font-weight: 800;
+
+        text-decoration: none;
+
+        white-space: nowrap;
+    }
+
+
+    .ticket-number-link:hover {
+        color: var(--barm-red);
+        text-decoration: underline;
+    }
+
+
+    /* =====================================================
+       OLDEST BADGE
+    ===================================================== */
+
+    .oldest-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        background: var(--barm-red);
+        color: white;
+
+        font-size: 0.63rem;
+        font-weight: 800;
+
+        text-transform: uppercase;
+
+        padding: 4px 8px;
+
+        border-radius: 10px;
+
+        margin-top: 5px;
+
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       PRIORITY BADGES
+    ===================================================== */
+
+    .priority-badge {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        min-width: 92px;
+
+        padding: 7px 12px;
+
+        border-radius: 20px;
+
+        font-size: 0.75rem;
+
+        font-weight: 800;
+
+        line-height: 1;
+
+        white-space: nowrap;
+    }
+
+
+    .priority-critical {
+        min-width: 105px;
+
+        background: var(--barm-red);
+        color: white;
+    }
+
+
+    .priority-high {
+        background: var(--barm-red-light);
+        color: var(--barm-red-dark);
+    }
+
+
+    .priority-medium {
+        background: var(--barm-green-light);
+        color: var(--barm-green-dark);
+    }
+
+
+    .priority-low {
+        background: #f2f4f3;
+        color: #5f6b65;
+    }
+
+
+    /* =====================================================
+       STATUS BADGES
+    ===================================================== */
+
+    .status-badge {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 5px;
+
+        min-width: 110px;
+
+        padding: 7px 11px;
+
+        border-radius: 20px;
+
+        font-size: 0.74rem;
+
+        font-weight: 800;
+
+        line-height: 1;
+
+        white-space: nowrap;
+    }
+
+
+    .status-new {
+        background: var(--barm-red-light);
+        color: var(--barm-red-dark);
+    }
+
+
+    .status-assigned {
+        background: var(--barm-green-light);
+        color: var(--barm-green-dark);
+    }
+
+
+    .status-progress {
+        min-width: 120px;
+
+        background: #e6f4ea;
+        color: #146c43;
+    }
+
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+
+    .status-reopened {
+        background: var(--barm-red);
+        color: white;
+    }
+
+
+    .status-resolved {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+
+    .status-closed {
+        background: #e2e3e5;
+        color: #41464b;
+    }
+
+
+    /* =====================================================
+       ASSIGNEE
+    ===================================================== */
+
+    .assignee {
+        display: flex;
+
+        align-items: center;
+
+        gap: 9px;
+
+        min-width: 170px;
+    }
+
+
+    .assignee-icon {
+        width: 36px;
+        height: 36px;
+
+        border-radius: 50%;
+
+        background: var(--barm-green-light);
+        color: var(--barm-green);
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        flex: 0 0 36px;
+    }
+
+
+    .assignee-name {
+        font-weight: 700;
+
+        line-height: 1.2;
+
+        white-space: normal;
+    }
+
+
+    .assignee-role {
+        display: block;
+
+        font-size: 0.75rem;
+
+        margin-top: 2px;
+
+        white-space: normal;
+    }
+
+
+    /* =====================================================
+       EMPTY STATE
+    ===================================================== */
+
+    .empty-state {
+        padding: 55px 20px;
+
+        text-align: center;
+
+        color: var(--barm-muted);
+    }
+
+
+    .empty-state i {
+        font-size: 3rem;
+
+        color: var(--barm-green);
+    }
+
+
+    /* =====================================================
+       TABLE SCROLL MESSAGE
+    ===================================================== */
+
+    .table-scroll-note {
+        display: none;
+
+        padding: 9px 15px;
+
+        background: #f7faf8;
+
+        color: #6c757d;
+
+        font-size: 0.76rem;
+
+        border-bottom:
+            1px solid #e8eeeb;
+    }
+
+
+    /* =====================================================
+       TABLET
+    ===================================================== */
+
+    @media (max-width: 1199.98px) {
+
+        .ticket-table {
+            min-width: 1320px;
+        }
+
+
+        .table-scroll-note {
+            display: block;
+        }
+
+    }
+
+
+    /* =====================================================
+       MOBILE
+    ===================================================== */
+
+    @media (max-width: 767.98px) {
+
+        .dashboard-header {
+            padding: 18px;
+
+            border-radius: 13px;
+        }
+
+
+        .dashboard-header-actions {
+            width: 100%;
+        }
+
+
+        .dashboard-header-actions .btn {
+            width: 100%;
+        }
+
+
+        .filter-buttons {
+            width: 100%;
+        }
+
+
+        .filter-buttons .btn {
+            flex: 1 1 auto;
+        }
+
+
+        .search-button-row {
+            flex-wrap: wrap;
+        }
+
+
+        .search-wrapper {
+            flex: 1 1 100%;
+        }
+
+
+        .search-submit-btn {
+            flex: 1;
+        }
+
+
+        .ticket-card-header {
+            padding: 15px;
+        }
+
+
+        .ticket-table thead th {
+            padding: 12px 13px;
+        }
+
+
+        .ticket-table tbody td {
+            padding: 13px;
+        }
+
+    }
+
+</style>
+
+
+<div class="dashboard-page">
+
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div class="dashboard-header">
+
+        <div
+            class="
+                d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+            "
+        >
+
+            <div>
+
+                <h1>
+
+                    <i
+                        class="
+                            bi
+                            bi-speedometer2
+                            me-2
+                        "
+                    ></i>
+
+                    Dashboard
+
+                </h1>
+
+
+                <div class="opacity-75">
+
+                    BARM Digital Call Center
+                    Ticketing System
+
+                </div>
+
+            </div>
+
+
+            {% if user.role == "AGENT" %}
+
+                <div class="dashboard-header-actions">
+
+                    <a
+                        href="{% url 'ticket_create' %}"
+                        class="btn btn-light"
+                    >
+
+                        <i
+                            class="
+                                bi
+                                bi-telephone-plus
+                                me-1
+                            "
+                        ></i>
+
+                        Log New Call
+
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- STATISTICS -->
+    <!-- ================================================= -->
+
+    <div class="row g-3">
+
+
+        <!-- TOTAL -->
+
+        <div class="col-6 col-lg">
+
+            <div class="card stat-card">
+
+                <div class="card-body">
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                        "
+                    >
+
+                        <div>
+
+                            <div class="stat-label">
+                                Total Tickets
+                            </div>
+
+                            <div class="stat-number">
+                                {{ total }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-icon green">
+
+                            <i
+                                class="
+                                    bi
+                                    bi-ticket-perforated
+                                "
+                            ></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- NEW -->
+
+        <div class="col-6 col-lg">
+
+            <div class="card stat-card">
+
+                <div class="card-body">
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                        "
+                    >
+
+                        <div>
+
+                            <div class="stat-label">
+                                New
+                            </div>
+
+                            <div class="stat-number">
+                                {{ new_count }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-icon red">
+
+                            <i
+                                class="
+                                    bi
+                                    bi-exclamation-circle
+                                "
+                            ></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- UNRESOLVED -->
+
+        <div class="col-6 col-lg">
+
+            <div class="card stat-card">
+
+                <div class="card-body">
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                        "
+                    >
+
+                        <div>
+
+                            <div class="stat-label">
+                                Unresolved
+                            </div>
+
+                            <div class="stat-number">
+                                {{ active_count }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-icon red">
+
+                            <i
+                                class="
+                                    bi
+                                    bi-hourglass-split
+                                "
+                            ></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RESOLVED / CLOSED -->
+
+        <div class="col-6 col-lg">
+
+            <div class="card stat-card">
+
+                <div class="card-body">
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                        "
+                    >
+
+                        <div>
+
+                            <div class="stat-label">
+                                Resolved / Closed
+                            </div>
+
+                            <div class="stat-number">
+                                {{ resolved_count }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-icon green">
+
+                            <i
+                                class="
+                                    bi
+                                    bi-check-circle
+                                "
+                            ></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CRITICAL -->
+
+        <div class="col-6 col-lg">
+
+            <div class="card stat-card">
+
+                <div class="card-body">
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                        "
+                    >
+
+                        <div>
+
+                            <div class="stat-label">
+                                Critical
+                            </div>
+
+                            <div
+                                class="
+                                    stat-number
+                                    text-danger
+                                "
+                            >
+                                {{ critical_count }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-icon red">
+
+                            <i
+                                class="
+                                    bi
+                                    bi-exclamation-triangle-fill
+                                "
+                            ></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- FILTERS + SEARCH -->
+    <!-- ================================================= -->
+
+    <div class="card filter-card">
+
+        <div class="card-body">
+
+            <div class="row g-3 align-items-end">
+
+
+                <!-- FILTER BUTTONS -->
+
+                <div class="col-xl-6">
+
+                    <label
+                        class="
+                            form-label
+                            fw-bold
+                            small
+                        "
+                    >
+                        Show Tickets
+                    </label>
+
+
+                    <div class="filter-buttons">
+
+
+                        <!-- ALL -->
+
+                        <a
+                            href="?filter=all{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                            class="
+                                btn
+                                filter-btn
+                                {% if ticket_filter == 'all' %}
+                                    active-filter
+                                {% else %}
+                                    btn-outline-success
+                                {% endif %}
+                            "
+                        >
+
+                            <i
+                                class="
+                                    bi
+                                    bi-list-ul
+                                    me-1
+                                "
+                            ></i>
+
+                            All Tickets
+
+                            <span
+                                class="
+                                    badge
+                                    bg-light
+                                    text-dark
+                                    ms-1
+                                "
+                            >
+                                {{ total }}
+                            </span>
+
+                        </a>
+
+
+                        <!-- UNRESOLVED -->
+
+                        <a
+                            href="?filter=unresolved{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                            class="
+                                btn
+                                filter-btn
+                                {% if ticket_filter == 'unresolved' %}
+                                    active-filter
+                                {% else %}
+                                    btn-outline-danger
+                                {% endif %}
+                            "
+                        >
+
+                            <i
+                                class="
+                                    bi
+                                    bi-exclamation-triangle
+                                    me-1
+                                "
+                            ></i>
+
+                            Unresolved
+
+                            <span
+                                class="
+                                    badge
+                                    bg-light
+                                    text-dark
+                                    ms-1
+                                "
+                            >
+                                {{ active_count }}
+                            </span>
+
+                        </a>
+
+
+                        <!-- CLOSED -->
+
+                        <a
+                            href="?filter=closed{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                            class="
+                                btn
+                                filter-btn
+                                {% if ticket_filter == 'closed' %}
+                                    active-filter
+                                {% else %}
+                                    btn-outline-secondary
+                                {% endif %}
+                            "
+                        >
+
+                            <i
+                                class="
+                                    bi
+                                    bi-lock-fill
+                                    me-1
+                                "
+                            ></i>
+
+                            Closed
+
+                            <span
+                                class="
+                                    badge
+                                    bg-light
+                                    text-dark
+                                    ms-1
+                                "
+                            >
+                                {{ closed_count }}
+                            </span>
+
+                        </a>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- SEARCH -->
+
+                <div class="col-xl-6">
+
+                    <form
+                        method="get"
+                        action="{% url 'dashboard' %}"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="filter"
+                            value="{{ ticket_filter }}"
+                        >
+
+
+                        <label
+                            for="ticket-search"
+                            class="
+                                form-label
+                                fw-bold
+                                small
+                            "
+                        >
+                            Search Tickets
+                        </label>
+
+
+                        <div
+                            class="
+                                d-flex
+                                gap-2
+                                search-button-row
+                            "
+                        >
+
+                            <div
+                                class="
+                                    search-wrapper
+                                    flex-grow-1
+                                "
+                            >
+
+                                <i
+                                    class="
+                                        bi
+                                        bi-search
+                                        search-icon
+                                    "
+                                ></i>
+
+
+                                <input
+                                    id="ticket-search"
+                                    type="text"
+                                    name="q"
+                                    value="{{ search_query }}"
+                                    class="
+                                        form-control
+                                        search-input
+                                    "
+                                    placeholder="Search location, details, ticket number, caller..."
+                                >
+
+                            </div>
+
+
+                            <button
+                                type="submit"
+                                class="
+                                    btn
+                                    btn-success
+                                    px-4
+                                    search-submit-btn
+                                "
+                            >
+
+                                <i
+                                    class="
+                                        bi
+                                        bi-search
+                                        me-1
+                                    "
+                                ></i>
+
+                                Search
+
+                            </button>
+
+
+                            {% if search_query %}
+
+                                <a
+                                    href="?filter={{ ticket_filter }}"
+                                    class="
+                                        btn
+                                        btn-outline-secondary
+                                    "
+                                    title="Clear search"
+                                >
+
+                                    <i
+                                        class="
+                                            bi
+                                            bi-x-lg
+                                        "
+                                    ></i>
+
+                                </a>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div
+                            class="
+                                form-text
+                                mt-2
+                            "
+                        >
+
+                            Search part of a location,
+                            subject, description, caller,
+                            ticket number, category or
+                            province.
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- TICKET TABLE -->
+    <!-- ================================================= -->
+
+    <div class="card ticket-card">
+
+
+        <div class="ticket-card-header">
+
+            <div
+                class="
+                    d-flex
+                    flex-column
+                    flex-md-row
+                    justify-content-between
+                    align-items-md-center
+                    gap-2
+                "
+            >
+
+                <div>
+
+                    <h2 class="ticket-card-title">
+
+
+                        {% if ticket_filter == "all" %}
+
+                            <i
+                                class="
+                                    bi
+                                    bi-list-ul
+                                    text-success
+                                    me-2
+                                "
+                            ></i>
+
+                            All Tickets
+
+
+                        {% elif ticket_filter == "closed" %}
+
+                            <i
+                                class="
+                                    bi
+                                    bi-lock-fill
+                                    text-secondary
+                                    me-2
+                                "
+                            ></i>
+
+                            Closed Tickets
+
+
+                        {% else %}
+
+                            <i
+                                class="
+                                    bi
+                                    bi-exclamation-triangle-fill
+                                    text-danger
+                                    me-2
+                                "
+                            ></i>
+
+                            Unresolved Tickets
+
+                        {% endif %}
+
+
+                    </h2>
+
+
+                    <div
+                        class="
+                            small
+                            text-muted
+                            mt-1
+                        "
+                    >
+
+                        Tickets are arranged from
+                        oldest to newest.
+
+                        {% if search_query %}
+
+                            Search results for:
+
+                            <strong>
+                                "{{ search_query }}"
+                            </strong>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <span class="ticket-result-count">
+
+                    {{ displayed_tickets|length }}
+
+                    Ticket{{ displayed_tickets|length|pluralize }}
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        {% if displayed_tickets %}
+
+
+            <div class="table-scroll-note">
+
+                <i class="bi bi-arrow-left-right me-1"></i>
+
+                Scroll horizontally to view all ticket details.
+
+            </div>
+
+
+            <div class="table-responsive">
+
+                <table class="table ticket-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="col-ticket">
+                                Ticket
+                            </th>
+
+                            <th class="col-date">
+                                Date Reported
+                            </th>
+
+                            <th class="col-province">
+                                Province
+                            </th>
+
+                            <th class="col-issue">
+                                Issue / Details
+                            </th>
+
+                            <th class="col-priority">
+                                Priority
+                            </th>
+
+                            <th class="col-status">
+                                Status
+                            </th>
+
+                            <th class="col-assigned">
+                                Assigned To
+                            </th>
+
+                            <th class="col-location">
+                                Location
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        {% for ticket in displayed_tickets %}
+
+
+                            <tr
+                                {% if ticket.status != "RESOLVED" and ticket.status != "CLOSED" %}
+                                    class="unresolved-ticket-row"
+                                {% endif %}
+                            >
+
+
+                                <!-- TICKET -->
+
+                                <td class="col-ticket">
+
+                                    <a
+                                        href="{% url 'ticket_detail' ticket.pk %}"
+                                        class="ticket-number-link"
+                                    >
+
+                                        {{ ticket.ticket_no }}
+
+                                    </a>
+
+
+                                    {% if forloop.first %}
+
+                                        <div>
+
+                                            <span class="oldest-badge">
+
+                                                <i
+                                                    class="
+                                                        bi
+                                                        bi-clock-history
+                                                        me-1
+                                                    "
+                                                ></i>
+
+                                                Oldest
+
+                                            </span>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- DATE -->
+
+                                <td class="col-date">
+
+                                    <div class="fw-semibold">
+
+                                        {{ ticket.created_at|date:"M d, Y" }}
+
+                                    </div>
+
+
+                                    <small class="text-muted">
+
+                                        {{ ticket.created_at|date:"h:i A" }}
+
+                                    </small>
+
+                                </td>
+
+
+                                <!-- PROVINCE -->
+
+                                <td class="col-province">
+
+                                    <i
+                                        class="
+                                            bi
+                                            bi-geo-alt
+                                            text-success
+                                            me-1
+                                        "
+                                    ></i>
+
+                                    {{ ticket.province }}
+
+                                </td>
+
+
+                                <!-- ISSUE -->
+
+                                <td class="col-issue">
+
+                                    <div class="issue-category">
+
+                                        {{ ticket.category }}
+
+                                    </div>
+
+
+                                    <div class="issue-subject">
+
+                                        {{ ticket.subject|truncatechars:70 }}
+
+                                    </div>
+
+
+                                    <small class="issue-description">
+
+                                        {{ ticket.description|truncatechars:120 }}
+
+                                    </small>
+
+                                </td>
+
+
+                                <!-- PRIORITY -->
+
+                                <td
+                                    class="
+                                        col-priority
+                                        text-center
+                                    "
+                                >
+
+
+                                    {% if ticket.priority == "CRITICAL" %}
+
+                                        <span
+                                            class="
+                                                priority-badge
+                                                priority-critical
+                                            "
+                                        >
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-exclamation-triangle-fill
+                                                    me-1
+                                                "
+                                            ></i>
+
+                                            Critical
+
+                                        </span>
+
+
+                                    {% elif ticket.priority == "HIGH" %}
+
+                                        <span
+                                            class="
+                                                priority-badge
+                                                priority-high
+                                            "
+                                        >
+
+                                            High
+
+                                        </span>
+
+
+                                    {% elif ticket.priority == "MEDIUM" %}
+
+                                        <span
+                                            class="
+                                                priority-badge
+                                                priority-medium
+                                            "
+                                        >
+
+                                            Medium
+
+                                        </span>
+
+
+                                    {% else %}
+
+                                        <span
+                                            class="
+                                                priority-badge
+                                                priority-low
+                                            "
+                                        >
+
+                                            Low
+
+                                        </span>
+
+                                    {% endif %}
+
+
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td
+                                    class="
+                                        col-status
+                                        text-center
+                                    "
+                                >
+
+
+                                    {% if ticket.status == "NEW" %}
+
+                                        <span
+                                            class="
+                                                status-badge
+                                                status-new
+                                            "
+                                        >
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-exclamation-circle-fill
+                                                "
+                                            ></i>
+
+                                            New
+
+                                        </span>
+
+
+                                    {% elif ticket.status == "ASSIGNED" %}
+
+                                        <span
+                                            class="
+                                                status-badge
+                                                status-assigned
+                                            "
+                                        >
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-person-check-fill
+                                                "
+                                            ></i>
+
+                                            Assigned
+
+                                        </span>
+
+
+                                    {% elif ticket.status == "IN_PROGRESS" %}
+
+                                        <span
+                                            class="
+                                                status-badge
+                                                status-progress
+                                            "
+                                        >
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-arrow-repeat
+                                                "
+                                            ></i>
+
+                                            In Progress
+
+                                        </span>
+
+
+                                    {% elif ticket.status == "PENDING" %}
+
+                                        <span
+                                            class="
+                                                status-badge
+                                                status-pending
+                                            "
+                                        >
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-hourglass-split
+                                                "
+                                            ></i>
+
+                                            Pending
+
+                                        </span>
+
+
+                                    {% elif ticket.status == "REOPENED" %}
+
+                                        <span
+                                            class="
+                                                status-badge
+                                                status-reopened
+                                            "
+                                        >
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-arrow-counterclockwise
+                                                "
+                                            ></i>
+
+                                            Reopened
+
+                                        </span>
+
+
+                                    {% elif ticket.status == "RESOLVED" %}
+
+                                        <span
+                                            class="
+                                                status-badge
+                                                status-resolved
+                                            "
+                                        >
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-check-circle-fill
+                                                "
+                                            ></i>
+
+                                            Resolved
+
+                                        </span>
+
+
+                                    {% elif ticket.status == "CLOSED" %}
+
+                                        <span
+                                            class="
+                                                status-badge
+                                                status-closed
+                                            "
+                                        >
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-lock-fill
+                                                "
+                                            ></i>
+
+                                            Closed
+
+                                        </span>
+
+                                    {% endif %}
+
+
+                                </td>
+
+
+                                <!-- ASSIGNED TO -->
+
+                                <td class="col-assigned">
+
+
+                                    {% if ticket.assigned_to %}
+
+                                        <div class="assignee">
+
+                                            <div class="assignee-icon">
+
+                                                <i
+                                                    class="
+                                                        bi
+                                                        bi-person-check-fill
+                                                    "
+                                                ></i>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <div class="assignee-name">
+
+                                                    {% if ticket.assigned_to.get_full_name %}
+
+                                                        {{ ticket.assigned_to.get_full_name }}
+
+                                                    {% else %}
+
+                                                        {{ ticket.assigned_to.username }}
+
+                                                    {% endif %}
+
+                                                </div>
+
+
+                                                <small
+                                                    class="
+                                                        text-muted
+                                                        assignee-role
+                                                    "
+                                                >
+
+                                                    {{ ticket.assigned_to.get_role_display }}
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+
+                                    {% else %}
+
+                                        <span
+                                            class="
+                                                text-danger
+                                                fw-semibold
+                                            "
+                                        >
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-person-x
+                                                    me-1
+                                                "
+                                            ></i>
+
+                                            Unassigned
+
+                                        </span>
+
+                                    {% endif %}
+
+
+                                </td>
+
+
+                                <!-- LOCATION -->
+
+                                <td
+                                    class="
+                                        col-location
+                                        location-cell
+                                    "
+                                >
+
+                                    <i
+                                        class="
+                                            bi
+                                            bi-pin-map
+                                            location-icon
+                                        "
+                                    ></i>
+
+                                    {{ ticket.site_location|default:"—" }}
+
+                                </td>
+
+
+                            </tr>
+
+
+                        {% endfor %}
+
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+        {% else %}
+
+
+            <div class="empty-state">
+
+                <i class="bi bi-search"></i>
+
+
+                <h5
+                    class="
+                        mt-3
+                        fw-bold
+                    "
+                >
+
+                    No Tickets Found
+
+                </h5>
+
+
+                {% if search_query %}
+
+                    <p>
+
+                        No tickets matched
+
+                        <strong>
+                            "{{ search_query }}"
+                        </strong>.
+
+                    </p>
+
+
+                    <a
+                        href="?filter={{ ticket_filter }}"
+                        class="
+                            btn
+                            btn-outline-success
+                        "
+                    >
+
+                        <i
+                            class="
+                                bi
+                                bi-x-circle
+                                me-1
+                            "
+                        ></i>
+
+                        Clear Search
+
+                    </a>
+
+
+                {% else %}
+
+                    <p class="mb-0">
+
+                        There are no tickets in this
+                        category.
+
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+{% endblock %}
