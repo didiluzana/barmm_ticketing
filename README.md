@@ -1,4 +1,4 @@
-# BARM Digital Call Center Ticketing System
+# BARMM Digital Call Center Ticketing System
 
 A Django starter application for logging and managing call-center incidents across seven configurable province/operational areas.
 
@@ -28,7 +28,7 @@ Open `http://127.0.0.1:8000/`. Admin is at `/admin/`.
 The seed command creates `admin`, `agent1` through `agent7`, `it1`, `tech1`, and `electrician1`. Initial demo password: `ChangeMe123!`. **Change every password before real use.**
 
 ## Configure your seven provinces
-The seed command intentionally creates `Province 1` ... `Province 7`, because your requested seven operational provinces may differ from the current official BARMM administrative composition. Sign in as admin, open **Admin → Provinces**, and rename the seven rows to the exact areas BARM Digital supports.
+The seed command intentionally creates `Province 1` ... `Province 7`, because your requested seven operational provinces may differ from the current official BARMM administrative composition. Sign in as admin, open **Admin → Provinces**, and rename the seven rows to the exact areas BARMM Digital supports.
 
 ## Recommended production improvements
 Use PostgreSQL, environment variables for `SECRET_KEY`/database settings, HTTPS, proper password validators, backups, audit retention, attachment uploads, SLA/escalation timers, email/SMS notifications, and a production WSGI/ASGI server.

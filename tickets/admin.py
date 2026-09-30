@@ -19,4 +19,4 @@ class TicketAdmin(admin.ModelAdmin):
 admin.site.register(Province)
 admin.site.register(TicketCategory)
 admin.site.register(TicketUpdate)
-admin.site.site_header = "BARM Digital Ticketing Administration"
+admin.site.site_header = "BARMM Digital Ticketing Administration"
