@@ -604,6 +604,9 @@ def ticket_create(request):
 # =========================================================
 # TICKET DETAIL / UPDATE
 # =========================================================
+# =========================================================
+# TICKET DETAIL / UPDATE
+# =========================================================
 
 @login_required
 def ticket_detail(
@@ -619,10 +622,22 @@ def ticket_detail(
     )
 
 
+    # =====================================================
+    # UPDATE TICKET - POST
+    # =====================================================
+
     if request.method == "POST":
 
+        # IMPORTANT:
+        # Pass the ticket's province to the form.
+        # This makes Assigned To show only:
+        # - IT
+        # - Technician
+        # - Electrician
+        # from the SAME province as the ticket.
         form = TicketActionForm(
-            request.POST
+            request.POST,
+            province=ticket.province,
         )
 
 
@@ -698,6 +713,7 @@ def ticket_detail(
 
             # =============================================
             # STATUS / ASSIGNMENT HISTORY
+            # DO NOT REMOVE
             # =============================================
 
             if (
@@ -745,8 +761,8 @@ def ticket_detail(
                         new_status
                     ),
 
-                    # Save new assignment
-                    # into the history row.
+                    # Keep the new assigned person
+                    # in the status history.
                     assigned_to=(
                         new_assigned_to
                     ),
@@ -764,10 +780,15 @@ def ticket_detail(
 
             # =============================================
             # ACTIVITY HISTORY
+            # DO NOT REMOVE
             # =============================================
 
             activity_notes = []
 
+
+            # ---------------------------------------------
+            # STATUS CHANGE HISTORY
+            # ---------------------------------------------
 
             if status_changed:
 
@@ -780,6 +801,10 @@ def ticket_detail(
                     )
                 )
 
+
+            # ---------------------------------------------
+            # ASSIGNMENT CHANGE HISTORY
+            # ---------------------------------------------
 
             if assignment_changed:
 
@@ -808,6 +833,10 @@ def ticket_detail(
                 )
 
 
+            # ---------------------------------------------
+            # USER NOTE / REMARK
+            # ---------------------------------------------
+
             if note:
 
                 activity_notes.append(
@@ -815,12 +844,20 @@ def ticket_detail(
                 )
 
 
+            # ---------------------------------------------
+            # NO STATUS OR ASSIGNMENT CHANGE
+            # ---------------------------------------------
+
             if not activity_notes:
 
                 activity_notes.append(
                     "Ticket updated."
                 )
 
+
+            # =============================================
+            # SAVE ACTIVITY HISTORY
+            # =============================================
 
             TicketUpdate.objects.create(
 
@@ -936,6 +973,7 @@ def ticket_detail(
 
             # =============================================
             # ACCESS CHECK AFTER UPDATE
+            # KEEP THIS
             # =============================================
 
             if visible_tickets(
@@ -955,8 +993,15 @@ def ticket_detail(
             )
 
 
+    # =====================================================
+    # UPDATE TICKET - GET
+    # =====================================================
+
     else:
 
+        # IMPORTANT:
+        # The province is also passed when initially
+        # displaying the Update Ticket form.
         form = TicketActionForm(
 
             initial={
@@ -967,9 +1012,81 @@ def ticket_detail(
                 "assigned_to":
                     ticket.assigned_to,
 
-            }
+            },
+
+            province=ticket.province,
 
         )
+
+
+    # =====================================================
+    # STATUS HISTORY
+    # KEEP THIS
+    # =====================================================
+
+    status_history = (
+
+        ticket.status_history
+
+        .select_related(
+            "changed_by",
+            "assigned_to",
+        )
+
+        .order_by(
+            "changed_at"
+        )
+
+    )
+
+
+    # =====================================================
+    # ACTIVITY HISTORY
+    # KEEP THIS
+    # =====================================================
+
+    activity_history = (
+
+        ticket.updates
+
+        .select_related(
+            "author"
+        )
+
+        .order_by(
+            "-created_at"
+        )
+
+    )
+
+
+    # =====================================================
+    # CONTEXT
+    # KEEP HISTORY IN CONTEXT
+    # =====================================================
+
+    context = {
+
+        "ticket":
+            ticket,
+
+        "form":
+            form,
+
+        "status_history":
+            status_history,
+
+        "activity_history":
+            activity_history,
+
+    }
+
+
+    return render(
+        request,
+        "tickets/ticket_detail.html",
+        context,
+    )
 
 
     # =====================================================
