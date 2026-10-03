@@ -1,0 +1,2287 @@
+{% extends "base.html" %}
+
+{% block title %}
+Personnel Ticket Records | BARM Digital
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+    /* =====================================================
+       PAGE
+    ===================================================== */
+
+    .records-page {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .records-header {
+        background:
+            linear-gradient(
+                135deg,
+                var(--barm-green-darker),
+                var(--barm-green)
+            );
+
+        color: white;
+
+        padding: 24px;
+
+        border-radius: 16px;
+
+        border-bottom:
+            4px solid var(--barm-red);
+
+        box-shadow:
+            0 8px 24px
+            rgba(20, 90, 55, 0.15);
+
+        margin-bottom: 20px;
+    }
+
+
+    .records-header h1 {
+        font-size: 1.55rem;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+
+    .records-header-description {
+        opacity: 0.82;
+        font-size: 0.9rem;
+    }
+
+
+    /* =====================================================
+       FILTER CARD
+    ===================================================== */
+
+    .filter-card {
+        border: 0;
+
+        border-radius: 16px;
+
+        box-shadow:
+            0 5px 20px
+            rgba(24, 70, 45, 0.08);
+
+        margin-bottom: 20px;
+    }
+
+
+    .filter-card .card-header {
+        background: white;
+
+        border-bottom:
+            3px solid var(--barm-red);
+
+        padding: 16px 20px;
+
+        font-weight: 800;
+    }
+
+
+    .filter-card .card-body {
+        padding: 20px;
+    }
+
+
+    .filter-label {
+        font-size: 0.75rem;
+
+        font-weight: 800;
+
+        color: #4b5851;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.3px;
+    }
+
+
+    .form-select,
+    .form-control {
+        min-height: 44px;
+
+        border-radius: 10px;
+    }
+
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color:
+            var(--barm-green);
+
+        box-shadow:
+            0 0 0 0.2rem
+            rgba(25, 135, 84, 0.13);
+    }
+
+
+    /* =====================================================
+       PROVINCE FILTER
+    ===================================================== */
+
+    .province-select {
+        border:
+            2px solid
+            rgba(25, 135, 84, 0.28);
+
+        font-weight: 700;
+    }
+
+
+    .province-select:focus {
+        border-color:
+            var(--barm-green);
+    }
+
+
+    /* =====================================================
+       PERSONNEL SELECT
+    ===================================================== */
+
+    .personnel-select:disabled {
+        background: #f2f4f3;
+
+        color: #8a948f;
+
+        cursor: not-allowed;
+    }
+
+
+    .filter-help {
+        margin-top: 5px;
+
+        color:
+            var(--barm-muted);
+
+        font-size: 0.72rem;
+    }
+
+
+    /* =====================================================
+       SELECTED PERSON
+    ===================================================== */
+
+    .person-card {
+        border: 0;
+
+        border-radius: 16px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #ffffff,
+                #f6fbf8
+            );
+
+        box-shadow:
+            0 5px 20px
+            rgba(24, 70, 45, 0.08);
+
+        margin-bottom: 20px;
+    }
+
+
+    .person-card .card-body {
+        padding: 20px;
+    }
+
+
+    .person-avatar {
+        width: 54px;
+        height: 54px;
+
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        flex-shrink: 0;
+
+        background:
+            var(--barm-green-light);
+
+        color:
+            var(--barm-green);
+
+        font-size: 1.4rem;
+    }
+
+
+    .person-name {
+        font-size: 1.15rem;
+
+        font-weight: 800;
+
+        color:
+            var(--barm-text);
+    }
+
+
+    .person-meta {
+        color:
+            var(--barm-muted);
+
+        font-size: 0.85rem;
+    }
+
+
+    /* =====================================================
+       SUMMARY CARDS
+    ===================================================== */
+
+    .summary-card {
+        border: 0;
+
+        border-radius: 14px;
+
+        background: white;
+
+        box-shadow:
+            0 4px 16px
+            rgba(24, 70, 45, 0.07);
+
+        height: 100%;
+    }
+
+
+    .summary-card .card-body {
+        padding: 16px;
+    }
+
+
+    .summary-label {
+        color:
+            var(--barm-muted);
+
+        font-size: 0.7rem;
+
+        font-weight: 800;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.3px;
+
+        margin-bottom: 5px;
+    }
+
+
+    .summary-number {
+        font-size: 1.65rem;
+
+        font-weight: 800;
+
+        color:
+            var(--barm-text);
+    }
+
+
+    .summary-card.danger {
+        border-top:
+            3px solid var(--barm-red);
+    }
+
+
+    .summary-card.success {
+        border-top:
+            3px solid var(--barm-green);
+    }
+
+
+    .summary-card.warning {
+        border-top:
+            3px solid #ffc107;
+    }
+
+
+    .summary-card.secondary {
+        border-top:
+            3px solid #6c757d;
+    }
+
+
+    /* =====================================================
+       TABLE CARD
+    ===================================================== */
+
+    .records-table-card {
+        border: 0;
+
+        border-radius: 16px;
+
+        overflow: hidden;
+
+        box-shadow:
+            0 5px 20px
+            rgba(24, 70, 45, 0.08);
+
+        margin-top: 20px;
+    }
+
+
+    .records-table-header {
+        background: white;
+
+        padding: 17px 20px;
+
+        border-bottom:
+            3px solid var(--barm-red);
+    }
+
+
+    .records-table-title {
+        font-size: 1rem;
+
+        font-weight: 800;
+
+        color:
+            var(--barm-text);
+
+        margin: 0;
+    }
+
+
+    .result-count {
+        display: inline-flex;
+
+        align-items: center;
+
+        background:
+            var(--barm-green);
+
+        color: white;
+
+        padding: 6px 12px;
+
+        border-radius: 20px;
+
+        font-size: 0.78rem;
+
+        font-weight: 800;
+
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       TABLE
+    ===================================================== */
+
+    .records-table {
+        min-width: 1350px;
+
+        margin-bottom: 0;
+    }
+
+
+    .records-table thead th {
+        background: #f3f7f5;
+
+        color: #48564f;
+
+        padding: 13px 14px;
+
+        font-size: 0.72rem;
+
+        font-weight: 800;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.25px;
+
+        white-space: nowrap;
+
+        border-bottom:
+            1px solid var(--barm-border);
+    }
+
+
+    .records-table tbody td {
+        padding: 14px;
+
+        vertical-align: middle;
+
+        border-bottom:
+            1px solid #e9eeeb;
+
+        font-size: 0.88rem;
+    }
+
+
+    .records-table tbody tr:hover td {
+        background: #f8fbf9;
+    }
+
+
+    /* =====================================================
+       TICKET LINK
+    ===================================================== */
+
+    .ticket-link {
+        color:
+            var(--barm-green-dark);
+
+        font-weight: 800;
+
+        text-decoration: none;
+
+        white-space: nowrap;
+    }
+
+
+    .ticket-link:hover {
+        color:
+            var(--barm-red);
+
+        text-decoration: underline;
+    }
+
+
+    /* =====================================================
+       CONNECTION
+    ===================================================== */
+
+    .connection-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        padding: 6px 10px;
+
+        border-radius: 20px;
+
+        background:
+            var(--barm-green-light);
+
+        color:
+            var(--barm-green-dark);
+
+        font-size: 0.72rem;
+
+        font-weight: 800;
+
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       PRIORITY
+    ===================================================== */
+
+    .priority-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        min-width: 90px;
+
+        padding: 7px 11px;
+
+        border-radius: 20px;
+
+        font-size: 0.72rem;
+
+        font-weight: 800;
+
+        white-space: nowrap;
+    }
+
+
+    .priority-critical {
+        background:
+            var(--barm-red);
+
+        color: white;
+    }
+
+
+    .priority-high {
+        background:
+            var(--barm-red-light);
+
+        color:
+            var(--barm-red-dark);
+    }
+
+
+    .priority-medium {
+        background:
+            var(--barm-green-light);
+
+        color:
+            var(--barm-green-dark);
+    }
+
+
+    .priority-low {
+        background: #f2f4f3;
+
+        color: #5f6b65;
+    }
+
+
+    /* =====================================================
+       STATUS
+    ===================================================== */
+
+    .status-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        min-width: 110px;
+
+        padding: 7px 11px;
+
+        border-radius: 20px;
+
+        font-size: 0.72rem;
+
+        font-weight: 800;
+
+        white-space: nowrap;
+    }
+
+
+    .status-new {
+        background:
+            var(--barm-red-light);
+
+        color:
+            var(--barm-red-dark);
+    }
+
+
+    .status-assigned {
+        background:
+            var(--barm-green-light);
+
+        color:
+            var(--barm-green-dark);
+    }
+
+
+    .status-progress {
+        background: #e6f4ea;
+
+        color: #146c43;
+    }
+
+
+    .status-pending {
+        background: #fff3cd;
+
+        color: #856404;
+    }
+
+
+    .status-reopened {
+        background:
+            var(--barm-red);
+
+        color: white;
+    }
+
+
+    .status-resolved {
+        background: #d1e7dd;
+
+        color: #0f5132;
+    }
+
+
+    .status-closed {
+        background: #e2e3e5;
+
+        color: #41464b;
+    }
+
+
+    /* =====================================================
+       EMPTY STATE
+    ===================================================== */
+
+    .empty-state {
+        text-align: center;
+
+        padding: 60px 20px;
+
+        color:
+            var(--barm-muted);
+    }
+
+
+    .empty-state i {
+        display: block;
+
+        font-size: 3rem;
+
+        color:
+            var(--barm-green);
+
+        margin-bottom: 12px;
+    }
+
+
+    /* =====================================================
+       MOBILE
+    ===================================================== */
+
+    @media (max-width: 767.98px) {
+
+        .records-header {
+            padding: 18px;
+        }
+
+
+        .filter-card .card-body {
+            padding: 16px;
+        }
+
+
+        .filter-submit {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+
+<div class="records-page">
+
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div class="records-header">
+
+        <div
+            class="
+                d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+            "
+        >
+
+            <div>
+
+                <h1>
+
+                    <i
+                        class="
+                            bi
+                            bi-people-fill
+                            me-2
+                        "
+                    ></i>
+
+                    Personnel Ticket Records
+
+                </h1>
+
+
+                <div class="records-header-description">
+
+                    Select a province and personnel to review
+                    ticket records by date and status.
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <span
+                    class="
+                        badge
+                        bg-light
+                        text-success
+                        px-3
+                        py-2
+                    "
+                >
+
+                    <i
+                        class="
+                            bi
+                            bi-shield-lock-fill
+                            me-1
+                        "
+                    ></i>
+
+                    Administrator Only
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- FILTER CARD -->
+    <!-- ================================================= -->
+
+    <div class="card filter-card">
+
+        <div class="card-header">
+
+            <i
+                class="
+                    bi
+                    bi-funnel-fill
+                    text-success
+                    me-2
+                "
+            ></i>
+
+            Report Filters
+
+        </div>
+
+
+        <div class="card-body">
+
+            <form
+                id="recordsFilterForm"
+                method="get"
+                action="{% url 'personnel_ticket_records' %}"
+            >
+
+                <div class="row g-3 align-items-end">
+
+
+                    <!-- ================================= -->
+                    <!-- PROVINCE -->
+                    <!-- ================================= -->
+
+                    <div class="col-xl-3 col-lg-6">
+
+                        <label
+                            for="province"
+                            class="
+                                form-label
+                                filter-label
+                            "
+                        >
+
+                            <i
+                                class="
+                                    bi
+                                    bi-geo-alt-fill
+                                    me-1
+                                "
+                            ></i>
+
+                            Province
+
+                        </label>
+
+
+                        <select
+                            id="province"
+                            name="province"
+                            class="
+                                form-select
+                                province-select
+                            "
+                            required
+                        >
+
+                            <option value="">
+
+                                Select province...
+
+                            </option>
+
+
+                            {% for province in provinces %}
+
+                                <option
+                                    value="{{ province.pk }}"
+                                    {% if selected_province_id == province.pk|stringformat:"s" %}
+                                        selected
+                                    {% endif %}
+                                >
+
+                                    {{ province.name }}
+
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <div class="filter-help">
+
+                            Select a province first.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================= -->
+                    <!-- PERSONNEL -->
+                    <!-- ================================= -->
+
+                    <div class="col-xl-3 col-lg-6">
+
+                        <label
+                            for="user"
+                            class="
+                                form-label
+                                filter-label
+                            "
+                        >
+
+                            <i
+                                class="
+                                    bi
+                                    bi-person-fill
+                                    me-1
+                                "
+                            ></i>
+
+                            Personnel
+
+                        </label>
+
+
+                        <select
+                            id="user"
+                            name="user"
+                            class="
+                                form-select
+                                personnel-select
+                            "
+                            {% if not selected_province %}
+                                disabled
+                            {% endif %}
+                            required
+                        >
+
+                            {% if selected_province %}
+
+                                <option value="">
+
+                                    Select personnel...
+
+                                </option>
+
+
+                                {% for person in personnel %}
+
+                                    <option
+                                        value="{{ person.pk }}"
+                                        {% if selected_user_id == person.pk|stringformat:"s" %}
+                                            selected
+                                        {% endif %}
+                                    >
+
+                                        {% if person.get_full_name %}
+
+                                            {{ person.get_full_name }}
+
+                                        {% else %}
+
+                                            {{ person.username }}
+
+                                        {% endif %}
+
+                                        —
+                                        {{ person.get_role_display }}
+
+                                    </option>
+
+                                {% empty %}
+
+                                    <option value="">
+
+                                        No personnel in this province
+
+                                    </option>
+
+                                {% endfor %}
+
+
+                            {% else %}
+
+                                <option value="">
+
+                                    Select province first...
+
+                                </option>
+
+                            {% endif %}
+
+                        </select>
+
+
+                        <div class="filter-help">
+
+                            Only personnel from the selected
+                            province are displayed.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================= -->
+                    <!-- FROM DATE -->
+                    <!-- ================================= -->
+
+                    <div class="col-xl-2 col-lg-3 col-md-6">
+
+                        <label
+                            for="date_from"
+                            class="
+                                form-label
+                                filter-label
+                            "
+                        >
+
+                            From Date
+
+                        </label>
+
+
+                        <input
+                            id="date_from"
+                            type="date"
+                            name="date_from"
+                            value="{{ date_from }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- ================================= -->
+                    <!-- TO DATE -->
+                    <!-- ================================= -->
+
+                    <div class="col-xl-2 col-lg-3 col-md-6">
+
+                        <label
+                            for="date_to"
+                            class="
+                                form-label
+                                filter-label
+                            "
+                        >
+
+                            To Date
+
+                        </label>
+
+
+                        <input
+                            id="date_to"
+                            type="date"
+                            name="date_to"
+                            value="{{ date_to }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- ================================= -->
+                    <!-- STATUS -->
+                    <!-- ================================= -->
+
+                    <div class="col-xl-2 col-lg-3 col-md-6">
+
+                        <label
+                            for="status"
+                            class="
+                                form-label
+                                filter-label
+                            "
+                        >
+
+                            Ticket Status
+
+                        </label>
+
+
+                        <select
+                            id="status"
+                            name="status"
+                            class="form-select"
+                        >
+
+                            <option value="">
+
+                                All Statuses
+
+                            </option>
+
+
+                            {% for value, label in statuses %}
+
+                                <option
+                                    value="{{ value }}"
+                                    {% if selected_status == value %}
+                                        selected
+                                    {% endif %}
+                                >
+
+                                    {{ label }}
+
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ================================= -->
+                    <!-- ACTION BUTTONS -->
+                    <!-- ================================= -->
+
+                    <div class="col-12">
+
+                        <div
+                            class="
+                                d-flex
+                                flex-column
+                                flex-sm-row
+                                justify-content-end
+                                gap-2
+                                mt-2
+                            "
+                        >
+
+                            <a
+                                href="{% url 'personnel_ticket_records' %}"
+                                class="
+                                    btn
+                                    btn-outline-secondary
+                                "
+                            >
+
+                                <i
+                                    class="
+                                        bi
+                                        bi-arrow-counterclockwise
+                                        me-1
+                                    "
+                                ></i>
+
+                                Clear Filters
+
+                            </a>
+
+
+                            <button
+                                type="submit"
+                                class="
+                                    btn
+                                    btn-success
+                                    px-4
+                                    filter-submit
+                                "
+                                {% if not selected_province %}
+                                    disabled
+                                {% endif %}
+                            >
+
+                                <i
+                                    class="
+                                        bi
+                                        bi-search
+                                        me-1
+                                    "
+                                ></i>
+
+                                Show Records
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    {% if selected_province and not selected_user %}
+
+
+        <!-- ================================================= -->
+        <!-- PROVINCE SELECTED -->
+        <!-- ================================================= -->
+
+        <div
+            class="
+                alert
+                alert-success
+                border-0
+                shadow-sm
+            "
+        >
+
+            <div
+                class="
+                    d-flex
+                    align-items-center
+                    gap-3
+                "
+            >
+
+                <i
+                    class="
+                        bi
+                        bi-geo-alt-fill
+                        fs-4
+                    "
+                ></i>
+
+
+                <div>
+
+                    <strong>
+
+                        {{ selected_province.name }}
+
+                    </strong>
+
+                    selected.
+
+                    Choose an Agent, IT personnel,
+                    Technician, or Electrician from
+                    this province.
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    {% endif %}
+
+
+    {% if selected_user %}
+
+
+        <!-- ================================================= -->
+        <!-- SELECTED PERSON -->
+        <!-- ================================================= -->
+
+        <div class="card person-card">
+
+            <div class="card-body">
+
+                <div
+                    class="
+                        d-flex
+                        flex-column
+                        flex-md-row
+                        align-items-md-center
+                        gap-3
+                    "
+                >
+
+                    <div class="person-avatar">
+
+                        <i class="bi bi-person-fill"></i>
+
+                    </div>
+
+
+                    <div class="flex-grow-1">
+
+                        <div class="person-name">
+
+                            {% if selected_user.get_full_name %}
+
+                                {{ selected_user.get_full_name }}
+
+                            {% else %}
+
+                                {{ selected_user.username }}
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="person-meta">
+
+                            <strong>
+
+                                {{ selected_user.get_role_display }}
+
+                            </strong>
+
+
+                            {% if selected_user.province %}
+
+                                &nbsp;•&nbsp;
+
+                                <i
+                                    class="
+                                        bi
+                                        bi-geo-alt-fill
+                                    "
+                                ></i>
+
+                                {{ selected_user.province }}
+
+                            {% endif %}
+
+
+                            &nbsp;•&nbsp;
+
+                            Username:
+                            {{ selected_user.username }}
+
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <span
+                            class="
+                                badge
+                                bg-success
+                                px-3
+                                py-2
+                            "
+                        >
+
+                            {{ total_count }}
+
+                            Related Ticket{{ total_count|pluralize }}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- STATUS SUMMARY -->
+        <!-- ================================================= -->
+
+        <div class="row g-3">
+
+
+            <!-- TOTAL -->
+
+            <div class="col-6 col-md-4 col-xl">
+
+                <div class="card summary-card">
+
+                    <div class="card-body">
+
+                        <div class="summary-label">
+
+                            Total
+
+                        </div>
+
+                        <div class="summary-number">
+
+                            {{ total_count }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- NEW -->
+
+            <div class="col-6 col-md-4 col-xl">
+
+                <div
+                    class="
+                        card
+                        summary-card
+                        danger
+                    "
+                >
+
+                    <div class="card-body">
+
+                        <div class="summary-label">
+
+                            New
+
+                        </div>
+
+                        <div class="summary-number">
+
+                            {{ new_count }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ASSIGNED -->
+
+            <div class="col-6 col-md-4 col-xl">
+
+                <div
+                    class="
+                        card
+                        summary-card
+                        success
+                    "
+                >
+
+                    <div class="card-body">
+
+                        <div class="summary-label">
+
+                            Assigned
+
+                        </div>
+
+                        <div class="summary-number">
+
+                            {{ assigned_count }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- IN PROGRESS -->
+
+            <div class="col-6 col-md-4 col-xl">
+
+                <div
+                    class="
+                        card
+                        summary-card
+                        success
+                    "
+                >
+
+                    <div class="card-body">
+
+                        <div class="summary-label">
+
+                            In Progress
+
+                        </div>
+
+                        <div class="summary-number">
+
+                            {{ in_progress_count }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PENDING -->
+
+            <div class="col-6 col-md-4 col-xl">
+
+                <div
+                    class="
+                        card
+                        summary-card
+                        warning
+                    "
+                >
+
+                    <div class="card-body">
+
+                        <div class="summary-label">
+
+                            Pending
+
+                        </div>
+
+                        <div class="summary-number">
+
+                            {{ pending_count }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- REOPENED -->
+
+            <div class="col-6 col-md-4 col-xl">
+
+                <div
+                    class="
+                        card
+                        summary-card
+                        danger
+                    "
+                >
+
+                    <div class="card-body">
+
+                        <div class="summary-label">
+
+                            Reopened
+
+                        </div>
+
+                        <div class="summary-number">
+
+                            {{ reopened_count }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RESOLVED -->
+
+            <div class="col-6 col-md-4 col-xl">
+
+                <div
+                    class="
+                        card
+                        summary-card
+                        success
+                    "
+                >
+
+                    <div class="card-body">
+
+                        <div class="summary-label">
+
+                            Resolved
+
+                        </div>
+
+                        <div class="summary-number">
+
+                            {{ resolved_count }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CLOSED -->
+
+            <div class="col-6 col-md-4 col-xl">
+
+                <div
+                    class="
+                        card
+                        summary-card
+                        secondary
+                    "
+                >
+
+                    <div class="card-body">
+
+                        <div class="summary-label">
+
+                            Closed
+
+                        </div>
+
+                        <div class="summary-number">
+
+                            {{ closed_count }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- RECORDS TABLE -->
+        <!-- ================================================= -->
+
+        <div class="card records-table-card">
+
+
+            <div class="records-table-header">
+
+                <div
+                    class="
+                        d-flex
+                        flex-column
+                        flex-md-row
+                        justify-content-between
+                        align-items-md-center
+                        gap-2
+                    "
+                >
+
+                    <div>
+
+                        <h2 class="records-table-title">
+
+                            <i
+                                class="
+                                    bi
+                                    bi-clock-history
+                                    text-success
+                                    me-2
+                                "
+                            ></i>
+
+                            Ticket Records
+
+                        </h2>
+
+
+                        <div
+                            class="
+                                small
+                                text-muted
+                                mt-1
+                            "
+                        >
+
+                            {{ selected_province.name }}
+
+                            &nbsp;•&nbsp;
+
+                            {% if date_from or date_to %}
+
+                                {% if date_from %}
+
+                                    {{ date_from }}
+
+                                {% else %}
+
+                                    Beginning
+
+                                {% endif %}
+
+                                to
+
+                                {% if date_to %}
+
+                                    {{ date_to }}
+
+                                {% else %}
+
+                                    Present
+
+                                {% endif %}
+
+                            {% else %}
+
+                                All available dates
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="result-count">
+
+                        {{ tickets|length }}
+
+                        Record{{ tickets|length|pluralize }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            {% if tickets %}
+
+
+                <div class="table-responsive">
+
+                    <table
+                        class="
+                            table
+                            records-table
+                        "
+                    >
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Ticket
+                                </th>
+
+                                <th>
+                                    Date Reported
+                                </th>
+
+                                <th>
+                                    Connection
+                                </th>
+
+                                <th>
+                                    Province
+                                </th>
+
+                                <th>
+                                    Category / Issue
+                                </th>
+
+                                <th>
+                                    Priority
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Logged By
+                                </th>
+
+                                <th>
+                                    Current Assignment
+                                </th>
+
+                                <th>
+                                    Location
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            {% for ticket in tickets %}
+
+                                <tr>
+
+
+                                    <!-- TICKET -->
+
+                                    <td>
+
+                                        <a
+                                            href="{% url 'ticket_detail' ticket.pk %}"
+                                            class="ticket-link"
+                                        >
+
+                                            {{ ticket.ticket_no }}
+
+                                        </a>
+
+                                    </td>
+
+
+                                    <!-- DATE -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+
+                                            {{ ticket.created_at|date:"M d, Y" }}
+
+                                        </div>
+
+
+                                        <small class="text-muted">
+
+                                            {{ ticket.created_at|date:"h:i A" }}
+
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- CONNECTION -->
+
+                                    <td>
+
+                                        <span class="connection-badge">
+
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-link-45deg
+                                                    me-1
+                                                "
+                                            ></i>
+
+                                            {{ ticket.personnel_connection }}
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- PROVINCE -->
+
+                                    <td>
+
+                                        <i
+                                            class="
+                                                bi
+                                                bi-geo-alt
+                                                text-success
+                                                me-1
+                                            "
+                                        ></i>
+
+                                        {{ ticket.province }}
+
+                                    </td>
+
+
+                                    <!-- ISSUE -->
+
+                                    <td>
+
+                                        <div class="fw-bold">
+
+                                            {{ ticket.category }}
+
+                                        </div>
+
+
+                                        <div>
+
+                                            {{ ticket.subject|truncatechars:60 }}
+
+                                        </div>
+
+
+                                        <small class="text-muted">
+
+                                            {{ ticket.description|truncatechars:90 }}
+
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- PRIORITY -->
+
+                                    <td>
+
+                                        {% if ticket.priority == "CRITICAL" %}
+
+                                            <span
+                                                class="
+                                                    priority-badge
+                                                    priority-critical
+                                                "
+                                            >
+
+                                                Critical
+
+                                            </span>
+
+                                        {% elif ticket.priority == "HIGH" %}
+
+                                            <span
+                                                class="
+                                                    priority-badge
+                                                    priority-high
+                                                "
+                                            >
+
+                                                High
+
+                                            </span>
+
+                                        {% elif ticket.priority == "MEDIUM" %}
+
+                                            <span
+                                                class="
+                                                    priority-badge
+                                                    priority-medium
+                                                "
+                                            >
+
+                                                Medium
+
+                                            </span>
+
+                                        {% else %}
+
+                                            <span
+                                                class="
+                                                    priority-badge
+                                                    priority-low
+                                                "
+                                            >
+
+                                                Low
+
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- STATUS -->
+
+                                    <td>
+
+                                        {% if ticket.status == "NEW" %}
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-new
+                                                "
+                                            >
+                                                New
+                                            </span>
+
+                                        {% elif ticket.status == "ASSIGNED" %}
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-assigned
+                                                "
+                                            >
+                                                Assigned
+                                            </span>
+
+                                        {% elif ticket.status == "IN_PROGRESS" %}
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-progress
+                                                "
+                                            >
+                                                In Progress
+                                            </span>
+
+                                        {% elif ticket.status == "PENDING" %}
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-pending
+                                                "
+                                            >
+                                                Pending
+                                            </span>
+
+                                        {% elif ticket.status == "REOPENED" %}
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-reopened
+                                                "
+                                            >
+                                                Reopened
+                                            </span>
+
+                                        {% elif ticket.status == "RESOLVED" %}
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-resolved
+                                                "
+                                            >
+                                                Resolved
+                                            </span>
+
+                                        {% elif ticket.status == "CLOSED" %}
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-closed
+                                                "
+                                            >
+                                                Closed
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- LOGGED BY -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+
+                                            {% if ticket.logged_by.get_full_name %}
+
+                                                {{ ticket.logged_by.get_full_name }}
+
+                                            {% else %}
+
+                                                {{ ticket.logged_by.username }}
+
+                                            {% endif %}
+
+                                        </div>
+
+
+                                        <small class="text-muted">
+
+                                            {{ ticket.logged_by.get_role_display }}
+
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- CURRENT ASSIGNMENT -->
+
+                                    <td>
+
+                                        {% if ticket.assigned_to %}
+
+                                            <div class="fw-semibold">
+
+                                                {% if ticket.assigned_to.get_full_name %}
+
+                                                    {{ ticket.assigned_to.get_full_name }}
+
+                                                {% else %}
+
+                                                    {{ ticket.assigned_to.username }}
+
+                                                {% endif %}
+
+                                            </div>
+
+
+                                            <small class="text-muted">
+
+                                                {{ ticket.assigned_to.get_role_display }}
+
+                                            </small>
+
+                                        {% else %}
+
+                                            <span
+                                                class="
+                                                    text-danger
+                                                    fw-semibold
+                                                "
+                                            >
+
+                                                <i
+                                                    class="
+                                                        bi
+                                                        bi-person-x
+                                                        me-1
+                                                    "
+                                                ></i>
+
+                                                Unassigned
+
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- LOCATION -->
+
+                                    <td>
+
+                                        {{ ticket.site_location|default:"—" }}
+
+                                    </td>
+
+
+                                </tr>
+
+                            {% endfor %}
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+            {% else %}
+
+
+                <div class="empty-state">
+
+                    <i class="bi bi-inbox"></i>
+
+                    <h5 class="fw-bold">
+
+                        No Ticket Records Found
+
+                    </h5>
+
+
+                    <p class="mb-0">
+
+                        There are no ticket records matching
+                        the selected personnel, date range,
+                        and ticket status.
+
+                    </p>
+
+                </div>
+
+
+            {% endif %}
+
+
+        </div>
+
+
+    {% elif not selected_province %}
+
+
+        <!-- ================================================= -->
+        <!-- INITIAL EMPTY STATE -->
+        <!-- ================================================= -->
+
+        <div
+            class="
+                card
+                border-0
+                shadow-sm
+            "
+        >
+
+            <div class="empty-state">
+
+                <i class="bi bi-geo-alt-fill"></i>
+
+
+                <h5 class="fw-bold">
+
+                    Select a Province
+
+                </h5>
+
+
+                <p class="mb-0">
+
+                    Select a province first. The Personnel
+                    dropdown will then show only Call Center
+                    Agents, IT personnel, Technicians, and
+                    Electricians assigned to that province.
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+<!-- =====================================================
+     PROVINCE AUTO-FILTER
+===================================================== -->
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const provinceSelect =
+                document.getElementById(
+                    "province"
+                );
+
+
+            if (!provinceSelect) {
+                return;
+            }
+
+
+            provinceSelect.addEventListener(
+                "change",
+                function () {
+
+                    const provinceId =
+                        this.value;
+
+
+                    if (!provinceId) {
+
+                        window.location.href =
+                            "{% url 'personnel_ticket_records' %}";
+
+                        return;
+
+                    }
+
+
+                    const params =
+                        new URLSearchParams();
+
+
+                    params.set(
+                        "province",
+                        provinceId
+                    );
+
+
+                    /*
+                     * Preserve date filters when
+                     * switching province.
+                     */
+
+                    const dateFrom =
+                        document.getElementById(
+                            "date_from"
+                        ).value;
+
+
+                    const dateTo =
+                        document.getElementById(
+                            "date_to"
+                        ).value;
+
+
+                    const status =
+                        document.getElementById(
+                            "status"
+                        ).value;
+
+
+                    if (dateFrom) {
+
+                        params.set(
+                            "date_from",
+                            dateFrom
+                        );
+
+                    }
+
+
+                    if (dateTo) {
+
+                        params.set(
+                            "date_to",
+                            dateTo
+                        );
+
+                    }
+
+
+                    if (status) {
+
+                        params.set(
+                            "status",
+                            status
+                        );
+
+                    }
+
+
+                    window.location.href =
+                        "{% url 'personnel_ticket_records' %}"
+                        + "?"
+                        + params.toString();
+
+                }
+            );
+
+        }
+    );
+
+</script>
+
+{% endblock %}

@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import (
     get_object_or_404,
     redirect,
@@ -15,6 +15,7 @@ from .forms import (
 )
 
 from .models import (
+    Province,
     Ticket,
     TicketStatusHistory,
     TicketUpdate,
@@ -1150,6 +1151,585 @@ def ticket_detail(
         "tickets/ticket_detail.html",
         context,
     )
+
+
+# =========================================================
+# ADMIN - PERSONNEL TICKET RECORDS
+# =========================================================
+
+@login_required
+def personnel_ticket_records(request):
+
+    # =====================================================
+    # ADMIN ACCESS ONLY
+    # =====================================================
+
+    if not (
+        request.user.is_superuser
+        or request.user.role == User.Role.ADMIN
+    ):
+
+        messages.error(
+            request,
+            "Access denied. Administrator access only.",
+        )
+
+        return redirect(
+            "dashboard"
+        )
+
+
+    # =====================================================
+    # GET FILTERS
+    # =====================================================
+
+    selected_province_id = request.GET.get(
+        "province",
+        "",
+    ).strip()
+
+    selected_user_id = request.GET.get(
+        "user",
+        "",
+    ).strip()
+
+    date_from = request.GET.get(
+        "date_from",
+        "",
+    ).strip()
+
+    date_to = request.GET.get(
+        "date_to",
+        "",
+    ).strip()
+
+    selected_status = request.GET.get(
+        "status",
+        "",
+    ).strip()
+
+
+    # =====================================================
+    # PROVINCES
+    # =====================================================
+
+    provinces = (
+        Province.objects
+        .filter(
+            is_active=True
+        )
+        .order_by(
+            "name"
+        )
+    )
+
+
+    # =====================================================
+    # PERSONNEL
+    #
+    # Only:
+    # - Call Center Agent
+    # - IT
+    # - Technician
+    # - Electrician
+    #
+    # Personnel are filtered by selected province.
+    # =====================================================
+
+    personnel = (
+        User.objects
+        .filter(
+            is_active=True,
+            role__in=[
+                User.Role.AGENT,
+                User.Role.IT,
+                User.Role.TECHNICIAN,
+                User.Role.ELECTRICIAN,
+            ],
+        )
+        .select_related(
+            "province"
+        )
+    )
+
+
+    # =====================================================
+    # FILTER PERSONNEL BY PROVINCE
+    # =====================================================
+
+    selected_province = None
+
+    if selected_province_id:
+
+        selected_province = get_object_or_404(
+            Province,
+            pk=selected_province_id,
+            is_active=True,
+        )
+
+        personnel = personnel.filter(
+            province=selected_province
+        )
+
+    else:
+
+        # Do not show personnel until
+        # a province is selected.
+        personnel = personnel.none()
+
+
+    personnel = personnel.order_by(
+        "role",
+        "first_name",
+        "last_name",
+        "username",
+    )
+
+
+    # =====================================================
+    # DEFAULT VALUES
+    # =====================================================
+
+    selected_user = None
+
+    tickets = Ticket.objects.none()
+
+    all_person_tickets = Ticket.objects.none()
+
+    ticket_connections = {}
+
+    total_count = 0
+    new_count = 0
+    assigned_count = 0
+    in_progress_count = 0
+    pending_count = 0
+    reopened_count = 0
+    resolved_count = 0
+    closed_count = 0
+
+
+    # =====================================================
+    # LOAD SELECTED PERSON
+    # =====================================================
+
+    if (
+        selected_province
+        and selected_user_id
+    ):
+
+        # IMPORTANT:
+        # User must belong to the selected province.
+
+        selected_user = get_object_or_404(
+            User.objects.select_related(
+                "province"
+            ),
+            pk=selected_user_id,
+            province=selected_province,
+            is_active=True,
+            role__in=[
+                User.Role.AGENT,
+                User.Role.IT,
+                User.Role.TECHNICIAN,
+                User.Role.ELECTRICIAN,
+            ],
+        )
+
+
+        # =================================================
+        # FIND TICKETS CONNECTED TO PERSON
+        # =================================================
+
+        if selected_user.role == User.Role.AGENT:
+
+            # ---------------------------------------------
+            # CALL CENTER AGENT
+            #
+            # Show tickets logged by this agent.
+            # ---------------------------------------------
+
+            all_person_tickets = (
+                Ticket.objects
+                .filter(
+                    logged_by=selected_user
+                )
+            )
+
+        else:
+
+            # ---------------------------------------------
+            # IT / TECHNICIAN / ELECTRICIAN
+            #
+            # Include:
+            #
+            # 1. Currently assigned tickets
+            # 2. Previously assigned tickets
+            #
+            # TicketStatusHistory keeps the historical
+            # connection even after reassignment.
+            # ---------------------------------------------
+
+            all_person_tickets = (
+                Ticket.objects
+                .filter(
+                    Q(
+                        assigned_to=selected_user
+                    )
+                    |
+                    Q(
+                        status_history__assigned_to=
+                        selected_user
+                    )
+                )
+                .distinct()
+            )
+
+
+        # =================================================
+        # EXTRA PROVINCE SAFETY FILTER
+        # =================================================
+
+        all_person_tickets = (
+            all_person_tickets
+            .filter(
+                province=selected_province
+            )
+        )
+
+
+        # =================================================
+        # DATE FILTER
+        #
+        # Date refers to ticket creation / report date.
+        # =================================================
+
+        if date_from:
+
+            all_person_tickets = (
+                all_person_tickets
+                .filter(
+                    created_at__date__gte=
+                    date_from
+                )
+            )
+
+
+        if date_to:
+
+            all_person_tickets = (
+                all_person_tickets
+                .filter(
+                    created_at__date__lte=
+                    date_to
+                )
+            )
+
+
+        # =================================================
+        # STATUS COUNTS
+        #
+        # These are calculated before applying the
+        # optional status dropdown so all status cards
+        # remain visible.
+        # =================================================
+
+        total_count = (
+            all_person_tickets.count()
+        )
+
+
+        new_count = (
+            all_person_tickets
+            .filter(
+                status=Ticket.Status.NEW
+            )
+            .count()
+        )
+
+
+        assigned_count = (
+            all_person_tickets
+            .filter(
+                status=Ticket.Status.ASSIGNED
+            )
+            .count()
+        )
+
+
+        in_progress_count = (
+            all_person_tickets
+            .filter(
+                status=Ticket.Status.IN_PROGRESS
+            )
+            .count()
+        )
+
+
+        pending_count = (
+            all_person_tickets
+            .filter(
+                status=Ticket.Status.PENDING
+            )
+            .count()
+        )
+
+
+        reopened_count = (
+            all_person_tickets
+            .filter(
+                status=Ticket.Status.REOPENED
+            )
+            .count()
+        )
+
+
+        resolved_count = (
+            all_person_tickets
+            .filter(
+                status=Ticket.Status.RESOLVED
+            )
+            .count()
+        )
+
+
+        closed_count = (
+            all_person_tickets
+            .filter(
+                status=Ticket.Status.CLOSED
+            )
+            .count()
+        )
+
+
+        # =================================================
+        # OPTIONAL STATUS FILTER
+        # =================================================
+
+        tickets = all_person_tickets
+
+
+        valid_statuses = [
+            value
+            for value, label
+            in Ticket.Status.choices
+        ]
+
+
+        if (
+            selected_status
+            and selected_status in valid_statuses
+        ):
+
+            tickets = tickets.filter(
+                status=selected_status
+            )
+
+        else:
+
+            selected_status = ""
+
+
+        # =================================================
+        # LOAD RELATED DATA
+        # =================================================
+
+        tickets = (
+            tickets
+            .select_related(
+                "province",
+                "category",
+                "assigned_to",
+                "logged_by",
+            )
+            .prefetch_related(
+                "status_history",
+                "status_history__assigned_to",
+                "status_history__changed_by",
+            )
+            .order_by(
+                "-created_at"
+            )
+        )
+
+
+        # =================================================
+        # DETERMINE PERSONNEL CONNECTION
+        # =================================================
+
+        for ticket in tickets:
+
+            connections = []
+
+
+            # ---------------------------------------------
+            # LOGGED TICKET
+            # ---------------------------------------------
+
+            if (
+                ticket.logged_by_id
+                == selected_user.id
+            ):
+
+                connections.append(
+                    "Logged Ticket"
+                )
+
+
+            # ---------------------------------------------
+            # CURRENTLY ASSIGNED
+            # ---------------------------------------------
+
+            if (
+                ticket.assigned_to_id
+                == selected_user.id
+            ):
+
+                connections.append(
+                    "Currently Assigned"
+                )
+
+
+            # ---------------------------------------------
+            # PREVIOUSLY ASSIGNED
+            # ---------------------------------------------
+
+            previously_assigned = False
+
+
+            for history in (
+                ticket.status_history.all()
+            ):
+
+                if (
+                    history.assigned_to_id
+                    == selected_user.id
+                ):
+
+                    previously_assigned = True
+                    break
+
+
+            if (
+                previously_assigned
+                and ticket.assigned_to_id
+                != selected_user.id
+            ):
+
+                connections.append(
+                    "Previously Assigned"
+                )
+
+
+            # ---------------------------------------------
+            # FALLBACK
+            # ---------------------------------------------
+
+            if not connections:
+
+                connections.append(
+                    "Ticket Activity"
+                )
+
+
+            ticket_connections[
+                ticket.pk
+            ] = " / ".join(
+                connections
+            )
+
+
+    # =====================================================
+    # ADD CONNECTION TEXT TO TICKETS
+    # =====================================================
+
+    for ticket in tickets:
+
+        ticket.personnel_connection = (
+            ticket_connections.get(
+                ticket.pk,
+                "Ticket Activity",
+            )
+        )
+
+
+    # =====================================================
+    # CONTEXT
+    # =====================================================
+
+    context = {
+
+        # Province filters
+        "provinces":
+            provinces,
+
+        "selected_province":
+            selected_province,
+
+        "selected_province_id":
+            selected_province_id,
+
+        # Personnel
+        "personnel":
+            personnel,
+
+        "selected_user":
+            selected_user,
+
+        "selected_user_id":
+            selected_user_id,
+
+        # Date
+        "date_from":
+            date_from,
+
+        "date_to":
+            date_to,
+
+        # Status
+        "selected_status":
+            selected_status,
+
+        "statuses":
+            Ticket.Status.choices,
+
+        # Tickets
+        "tickets":
+            tickets,
+
+        # Counts
+        "total_count":
+            total_count,
+
+        "new_count":
+            new_count,
+
+        "assigned_count":
+            assigned_count,
+
+        "in_progress_count":
+            in_progress_count,
+
+        "pending_count":
+            pending_count,
+
+        "reopened_count":
+            reopened_count,
+
+        "resolved_count":
+            resolved_count,
+
+        "closed_count":
+            closed_count,
+
+    }
+
+
+    return render(
+        request,
+        "tickets/personnel_ticket_records.html",
+        context,
+    )
+
 
 
 # =========================================================
