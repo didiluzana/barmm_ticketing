@@ -1,0 +1,1566 @@
+{% extends "base.html" %}
+
+
+
+
+{% block content %}
+
+<style>
+
+    /* =====================================================
+       SCREEN PAGE
+    ===================================================== */
+
+    .report-page {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+
+    /* =====================================================
+       SCREEN HEADER
+    ===================================================== */
+
+    .screen-report-header {
+        background:
+            linear-gradient(
+                135deg,
+                var(--barm-green-darker),
+                var(--barm-green)
+            );
+
+        color: white;
+
+        padding: 24px;
+
+        border-radius: 16px;
+
+        border-bottom:
+            4px solid var(--barm-red);
+
+        box-shadow:
+            0 8px 24px
+            rgba(20, 90, 55, 0.15);
+
+        margin-bottom: 20px;
+    }
+
+
+    .screen-report-header h1 {
+        margin: 0 0 5px;
+
+        font-size: 1.5rem;
+
+        font-weight: 800;
+    }
+
+
+    .screen-report-header p {
+        margin: 0;
+
+        opacity: 0.82;
+
+        font-size: 0.88rem;
+    }
+
+
+    /* =====================================================
+       FILTER CARD
+    ===================================================== */
+
+    .report-filter-card {
+        border: 0;
+
+        border-radius: 16px;
+
+        box-shadow:
+            0 5px 20px
+            rgba(24, 70, 45, 0.08);
+
+        margin-bottom: 20px;
+    }
+
+
+    .report-filter-card .card-header {
+        background: white;
+
+        padding: 16px 20px;
+
+        border-bottom:
+            3px solid var(--barm-red);
+
+        font-weight: 800;
+    }
+
+
+    .report-filter-card .card-body {
+        padding: 20px;
+    }
+
+
+    .filter-label {
+        font-size: 0.75rem;
+
+        font-weight: 800;
+
+        color: #4b5851;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.3px;
+    }
+
+
+    .form-control {
+        min-height: 44px;
+
+        border-radius: 10px;
+    }
+
+
+    /* =====================================================
+       REPORT PAPER
+    ===================================================== */
+
+    .report-paper {
+        background: white;
+
+        border-radius: 14px;
+
+        box-shadow:
+            0 5px 20px
+            rgba(24, 70, 45, 0.08);
+
+        padding: 30px;
+
+        margin-bottom: 20px;
+    }
+
+
+    /* =====================================================
+       PRINT REPORT HEADER
+    ===================================================== */
+
+    .print-report-header {
+        text-align: center;
+
+        padding-bottom: 18px;
+
+        border-bottom:
+            3px solid var(--barm-green);
+
+        margin-bottom: 20px;
+    }
+
+
+    .report-system-name {
+        color:
+            var(--barm-green-dark);
+
+        font-size: 1.45rem;
+
+        font-weight: 900;
+
+        letter-spacing: 0.3px;
+    }
+
+
+    .report-title {
+        margin-top: 4px;
+
+        color:
+            var(--barm-text);
+
+        font-size: 1.15rem;
+
+        font-weight: 800;
+
+        text-transform: uppercase;
+    }
+
+
+    .report-subtitle {
+        margin-top: 4px;
+
+        color:
+            var(--barm-muted);
+
+        font-size: 0.8rem;
+    }
+
+
+    /* =====================================================
+       PERSONNEL INFORMATION
+    ===================================================== */
+
+    .personnel-information {
+        display: grid;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap: 12px;
+
+        padding: 15px;
+
+        margin-bottom: 18px;
+
+        background:
+            #f7faf8;
+
+        border:
+            1px solid
+            var(--barm-border);
+
+        border-radius: 10px;
+    }
+
+
+    .info-label {
+        color:
+            var(--barm-muted);
+
+        font-size: 0.68rem;
+
+        font-weight: 800;
+
+        text-transform: uppercase;
+
+        margin-bottom: 3px;
+    }
+
+
+    .info-value {
+        color:
+            var(--barm-text);
+
+        font-size: 0.87rem;
+
+        font-weight: 750;
+    }
+
+
+    /* =====================================================
+       STATUS SUMMARY
+    ===================================================== */
+
+    .report-summary {
+        display: grid;
+
+        grid-template-columns:
+            repeat(8, minmax(0, 1fr));
+
+        gap: 8px;
+
+        margin-bottom: 20px;
+    }
+
+
+    .report-summary-item {
+        text-align: center;
+
+        padding: 10px 5px;
+
+        border:
+            1px solid
+            var(--barm-border);
+
+        border-radius: 8px;
+
+        background: white;
+    }
+
+
+    .report-summary-label {
+        color:
+            var(--barm-muted);
+
+        font-size: 0.6rem;
+
+        font-weight: 800;
+
+        text-transform: uppercase;
+    }
+
+
+    .report-summary-value {
+        margin-top: 3px;
+
+        color:
+            var(--barm-text);
+
+        font-size: 1.15rem;
+
+        font-weight: 900;
+    }
+
+
+    /* =====================================================
+       TABLE
+    ===================================================== */
+
+    .report-table-wrapper {
+        overflow-x: auto;
+    }
+
+
+    .report-table {
+        width: 100%;
+
+        min-width: 1200px;
+
+        border-collapse: collapse;
+
+        margin: 0;
+    }
+
+
+    .report-table th {
+        background:
+            var(--barm-green-dark);
+
+        color: white;
+
+        padding: 9px 8px;
+
+        border:
+            1px solid
+            #d6ddd9;
+
+        font-size: 0.66rem;
+
+        font-weight: 800;
+
+        text-align: left;
+
+        text-transform: uppercase;
+
+        white-space: nowrap;
+    }
+
+
+    .report-table td {
+        padding: 9px 8px;
+
+        border:
+            1px solid
+            #dde3df;
+
+        vertical-align: top;
+
+        font-size: 0.72rem;
+    }
+
+
+    .ticket-number {
+        color:
+            var(--barm-green-dark);
+
+        font-weight: 800;
+
+        text-decoration: none;
+
+        white-space: nowrap;
+    }
+
+
+    .report-status {
+        font-weight: 800;
+
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       EMPTY REPORT
+    ===================================================== */
+
+    .empty-report {
+        padding: 50px 20px;
+
+        text-align: center;
+
+        color:
+            var(--barm-muted);
+    }
+
+
+    .empty-report i {
+        display: block;
+
+        margin-bottom: 10px;
+
+        color:
+            var(--barm-green);
+
+        font-size: 2.5rem;
+    }
+
+
+    /* =====================================================
+       SIGNATURE
+    ===================================================== */
+
+    .signature-section {
+        display: flex;
+
+        justify-content: flex-end;
+
+        margin-top: 70px;
+
+        padding-top: 10px;
+    }
+
+
+    .signature-box {
+        width: 300px;
+
+        text-align: center;
+    }
+
+
+    /*
+     * This is the requested signature line.
+     * The person signs ABOVE the printed name.
+     */
+
+    .signature-line {
+        width: 100%;
+
+        border-top:
+            1.5px solid #222;
+
+        margin-bottom: 6px;
+    }
+
+
+    .signature-name {
+        font-size: 0.85rem;
+
+        font-weight: 900;
+
+        text-transform: uppercase;
+    }
+
+
+    .signature-role {
+        margin-top: 2px;
+
+        color:
+            var(--barm-muted);
+
+        font-size: 0.72rem;
+    }
+
+
+    .signature-label {
+        margin-top: 4px;
+
+        color:
+            var(--barm-muted);
+
+        font-size: 0.65rem;
+
+        font-style: italic;
+    }
+
+
+    /* =====================================================
+       PRINT FOOTNOTE
+    ===================================================== */
+
+    .report-footnote {
+        margin-top: 35px;
+
+        padding-top: 10px;
+
+        border-top:
+            1px solid #ddd;
+
+        color: #777;
+
+        text-align: center;
+
+        font-size: 0.62rem;
+    }
+
+
+    /* =====================================================
+       MOBILE
+    ===================================================== */
+
+    @media (max-width: 991.98px) {
+
+        .personnel-information {
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+        }
+
+
+        .report-summary {
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+        }
+
+    }
+
+
+    @media (max-width: 575.98px) {
+
+        .report-paper {
+            padding: 18px 12px;
+        }
+
+
+        .personnel-information {
+            grid-template-columns: 1fr;
+        }
+
+
+        .report-summary {
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+        }
+
+
+        .signature-box {
+            width: 100%;
+        }
+
+    }
+
+
+    /* =====================================================
+       PRINT SETTINGS
+    ===================================================== */
+
+    @media print {
+
+        @page {
+            size: landscape;
+            margin: 10mm;
+        }
+
+
+        /*
+         * Hide navbar, footer, screen header,
+         * filter controls and messages.
+         */
+
+        nav,
+        .barm-navbar,
+        .barm-footer,
+        .screen-only,
+        .screen-report-header,
+        .report-filter-card,
+        .message-container {
+            display: none !important;
+        }
+
+
+        html,
+        body {
+            background: white !important;
+
+            color: black !important;
+
+            margin: 0 !important;
+
+            padding: 0 !important;
+        }
+
+
+        .main-content {
+            padding: 0 !important;
+
+            margin: 0 !important;
+        }
+
+
+        .report-page {
+            max-width: none !important;
+
+            width: 100% !important;
+
+            margin: 0 !important;
+        }
+
+
+        .report-paper {
+            box-shadow: none !important;
+
+            border: 0 !important;
+
+            border-radius: 0 !important;
+
+            margin: 0 !important;
+
+            padding: 0 !important;
+        }
+
+
+        .print-report-header {
+            margin-bottom: 12px;
+
+            padding-bottom: 10px;
+
+            border-bottom:
+                2px solid #000;
+        }
+
+
+        .report-system-name {
+            color: black !important;
+
+            font-size: 15pt;
+        }
+
+
+        .report-title {
+            font-size: 11pt;
+        }
+
+
+        .report-subtitle {
+            color: #333 !important;
+
+            font-size: 8pt;
+        }
+
+
+        .personnel-information {
+            padding: 8px;
+
+            margin-bottom: 10px;
+
+            background: white !important;
+
+            border:
+                1px solid #777;
+
+            border-radius: 0;
+
+            gap: 5px;
+        }
+
+
+        .info-label {
+            color: #444 !important;
+
+            font-size: 6pt;
+        }
+
+
+        .info-value {
+            font-size: 7.5pt;
+        }
+
+
+        .report-summary {
+            gap: 4px;
+
+            margin-bottom: 10px;
+        }
+
+
+        .report-summary-item {
+            padding: 5px 2px;
+
+            border:
+                1px solid #999;
+
+            border-radius: 0;
+        }
+
+
+        .report-summary-label {
+            color: #333 !important;
+
+            font-size: 5.5pt;
+        }
+
+
+        .report-summary-value {
+            font-size: 9pt;
+        }
+
+
+        .report-table-wrapper {
+            overflow: visible !important;
+        }
+
+
+        .report-table {
+            min-width: 0 !important;
+
+            width: 100% !important;
+
+            table-layout: fixed;
+        }
+
+
+        .report-table th {
+            background:
+                #e8e8e8 !important;
+
+            color:
+                black !important;
+
+            padding: 4px 3px;
+
+            border:
+                1px solid #555;
+
+            font-size: 5.5pt;
+
+            -webkit-print-color-adjust:
+                exact;
+
+            print-color-adjust:
+                exact;
+        }
+
+
+        .report-table td {
+            padding: 4px 3px;
+
+            border:
+                1px solid #777;
+
+            font-size: 5.8pt;
+
+            word-break: break-word;
+        }
+
+
+        .ticket-number {
+            color: black !important;
+
+            text-decoration: none !important;
+        }
+
+
+        /*
+         * Try to keep individual ticket rows together.
+         */
+
+        .report-table tr {
+            break-inside: avoid;
+
+            page-break-inside: avoid;
+        }
+
+
+        /*
+         * Repeat table headings when browser supports it.
+         */
+
+        .report-table thead {
+            display:
+                table-header-group;
+        }
+
+
+        .signature-section {
+            margin-top: 55px;
+
+            break-inside: avoid;
+
+            page-break-inside: avoid;
+        }
+
+
+        .signature-box {
+            width: 260px;
+        }
+
+
+        .signature-name {
+            font-size: 8pt;
+        }
+
+
+        .signature-role {
+            color: #333 !important;
+
+            font-size: 7pt;
+        }
+
+
+        .signature-label {
+            color: #444 !important;
+
+            font-size: 6pt;
+        }
+
+
+        .report-footnote {
+            color: #555 !important;
+
+            font-size: 5.5pt;
+        }
+
+    }
+
+</style>
+
+
+<div class="report-page">
+
+
+    <!-- ================================================= -->
+    <!-- SCREEN HEADER -->
+    <!-- ================================================= -->
+
+    <div class="screen-report-header">
+
+        <h1>
+
+            <i class="bi bi-printer-fill me-2"></i>
+
+            My Ticket History Report
+
+        </h1>
+
+
+        <p>
+
+            Filter your own ticket history by date,
+            then print the report for your records.
+
+        </p>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- DATE FILTER -->
+    <!-- ================================================= -->
+
+    <div class="card report-filter-card screen-only">
+
+        <div class="card-header">
+
+            <i
+                class="
+                    bi
+                    bi-calendar-range
+                    text-success
+                    me-2
+                "
+            ></i>
+
+            Report Date Range
+
+        </div>
+
+
+        <div class="card-body">
+
+            <form
+                method="get"
+                action="{% url 'my_ticket_history_report' %}"
+            >
+
+                <div class="row g-3 align-items-end">
+
+
+                    <!-- FROM DATE -->
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <label
+                            for="date_from"
+                            class="
+                                form-label
+                                filter-label
+                            "
+                        >
+
+                            From Date
+
+                        </label>
+
+
+                        <input
+                            type="date"
+                            id="date_from"
+                            name="date_from"
+                            value="{{ date_from }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- TO DATE -->
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <label
+                            for="date_to"
+                            class="
+                                form-label
+                                filter-label
+                            "
+                        >
+
+                            To Date
+
+                        </label>
+
+
+                        <input
+                            type="date"
+                            id="date_to"
+                            name="date_to"
+                            value="{{ date_to }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- FILTER -->
+
+                    <div class="col-lg-2 col-md-4">
+
+                        <button
+                            type="submit"
+                            class="
+                                btn
+                                btn-success
+                                w-100
+                            "
+                        >
+
+                            <i class="bi bi-funnel-fill me-1"></i>
+
+                            Filter
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- CLEAR -->
+
+                    <div class="col-lg-2 col-md-4">
+
+                        <a
+                            href="{% url 'my_ticket_history_report' %}"
+                            class="
+                                btn
+                                btn-outline-secondary
+                                w-100
+                            "
+                        >
+
+                            <i
+                                class="
+                                    bi
+                                    bi-arrow-counterclockwise
+                                    me-1
+                                "
+                            ></i>
+
+                            Clear
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- PRINT -->
+
+                    <div class="col-lg-2 col-md-4">
+
+                        <button
+                            type="button"
+                            class="
+                                btn
+                                btn-danger
+                                w-100
+                            "
+                            onclick="window.print();"
+                        >
+
+                            <i class="bi bi-printer-fill me-1"></i>
+
+                            Print Report
+
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- PRINTABLE REPORT -->
+    <!-- ================================================= -->
+
+    <div class="report-paper">
+
+
+        <!-- ============================================= -->
+        <!-- REPORT HEADER -->
+        <!-- ============================================= -->
+
+        <div class="print-report-header">
+
+            <div class="report-system-name">
+
+                BARMM Digital
+
+            </div>
+
+
+            <div class="report-title">
+
+                Personnel Ticket History Report
+
+            </div>
+
+
+            <div class="report-subtitle">
+
+                Call Center Ticketing System
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================================= -->
+        <!-- PERSONNEL INFORMATION -->
+        <!-- ============================================= -->
+
+        <div class="personnel-information">
+
+
+            <!-- NAME -->
+
+            <div>
+
+                <div class="info-label">
+
+                    Personnel Name
+
+                </div>
+
+
+                <div class="info-value">
+
+                    {% if user.get_full_name %}
+
+                        {{ user.get_full_name }}
+
+                    {% else %}
+
+                        {{ user.username }}
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- ROLE -->
+
+            <div>
+
+                <div class="info-label">
+
+                    Position / Role
+
+                </div>
+
+
+                <div class="info-value">
+
+                    {{ user.get_role_display }}
+
+                </div>
+
+            </div>
+
+
+            <!-- PROVINCE -->
+
+            <div>
+
+                <div class="info-label">
+
+                    Province
+
+                </div>
+
+
+                <div class="info-value">
+
+                    {% if user.province %}
+
+                        {{ user.province }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- REPORT PERIOD -->
+
+            <div>
+
+                <div class="info-label">
+
+                    Report Period
+
+                </div>
+
+
+                <div class="info-value">
+
+                    {% if date_from %}
+
+                        {{ date_from }}
+
+                    {% else %}
+
+                        Beginning
+
+                    {% endif %}
+
+                    &nbsp;to&nbsp;
+
+                    {% if date_to %}
+
+                        {{ date_to }}
+
+                    {% else %}
+
+                        Present
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ============================================= -->
+        <!-- STATUS SUMMARY -->
+        <!-- ============================================= -->
+
+        <div class="report-summary">
+
+
+            <div class="report-summary-item">
+
+                <div class="report-summary-label">
+                    Total
+                </div>
+
+                <div class="report-summary-value">
+                    {{ total_count }}
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-item">
+
+                <div class="report-summary-label">
+                    New
+                </div>
+
+                <div class="report-summary-value">
+                    {{ new_count }}
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-item">
+
+                <div class="report-summary-label">
+                    Assigned
+                </div>
+
+                <div class="report-summary-value">
+                    {{ assigned_count }}
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-item">
+
+                <div class="report-summary-label">
+                    In Progress
+                </div>
+
+                <div class="report-summary-value">
+                    {{ in_progress_count }}
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-item">
+
+                <div class="report-summary-label">
+                    Pending
+                </div>
+
+                <div class="report-summary-value">
+                    {{ pending_count }}
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-item">
+
+                <div class="report-summary-label">
+                    Reopened
+                </div>
+
+                <div class="report-summary-value">
+                    {{ reopened_count }}
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-item">
+
+                <div class="report-summary-label">
+                    Resolved
+                </div>
+
+                <div class="report-summary-value">
+                    {{ resolved_count }}
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-item">
+
+                <div class="report-summary-label">
+                    Closed
+                </div>
+
+                <div class="report-summary-value">
+                    {{ closed_count }}
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ============================================= -->
+        <!-- TICKET HISTORY -->
+        <!-- ============================================= -->
+
+        {% if tickets %}
+
+
+            <div class="report-table-wrapper">
+
+                <table class="report-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th style="width: 10%;">
+                                Ticket No.
+                            </th>
+
+                            <th style="width: 9%;">
+                                Date
+                            </th>
+
+                            <th style="width: 11%;">
+                                Connection
+                            </th>
+
+                            <th style="width: 11%;">
+                                Category
+                            </th>
+
+                            <th style="width: 19%;">
+                                Issue / Subject
+                            </th>
+
+                            <th style="width: 9%;">
+                                Priority
+                            </th>
+
+                            <th style="width: 10%;">
+                                Status
+                            </th>
+
+                            <th style="width: 11%;">
+                                Assigned To
+                            </th>
+
+                            <th style="width: 10%;">
+                                Location
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for ticket in tickets %}
+
+                            <tr>
+
+
+                                <!-- TICKET -->
+
+                                <td>
+
+                                    <a
+                                        href="{% url 'ticket_detail' ticket.pk %}"
+                                        class="ticket-number"
+                                    >
+
+                                        {{ ticket.ticket_no }}
+
+                                    </a>
+
+                                </td>
+
+
+                                <!-- DATE -->
+
+                                <td>
+
+                                    {{ ticket.created_at|date:"M d, Y" }}
+
+                                    <br>
+
+                                    {{ ticket.created_at|date:"h:i A" }}
+
+                                </td>
+
+
+                                <!-- CONNECTION -->
+
+                                <td>
+
+                                    {{ ticket.personnel_connection }}
+
+                                </td>
+
+
+                                <!-- CATEGORY -->
+
+                                <td>
+
+                                    {{ ticket.category }}
+
+                                </td>
+
+
+                                <!-- ISSUE -->
+
+                                <td>
+
+                                    <strong>
+
+                                        {{ ticket.subject }}
+
+                                    </strong>
+
+                                    <br>
+
+                                    {{ ticket.description|truncatechars:130 }}
+
+                                </td>
+
+
+                                <!-- PRIORITY -->
+
+                                <td>
+
+                                    {{ ticket.get_priority_display }}
+
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td>
+
+                                    <span class="report-status">
+
+                                        {{ ticket.get_status_display }}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- ASSIGNED -->
+
+                                <td>
+
+                                    {% if ticket.assigned_to %}
+
+                                        {% if ticket.assigned_to.get_full_name %}
+
+                                            {{ ticket.assigned_to.get_full_name }}
+
+                                        {% else %}
+
+                                            {{ ticket.assigned_to.username }}
+
+                                        {% endif %}
+
+                                    {% else %}
+
+                                        Unassigned
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- LOCATION -->
+
+                                <td>
+
+                                    {{ ticket.site_location|default:"—" }}
+
+                                </td>
+
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+        {% else %}
+
+
+            <div class="empty-report">
+
+                <i class="bi bi-inbox"></i>
+
+                <strong>
+                    No ticket history found.
+                </strong>
+
+                <div>
+
+                    No ticket records are available for
+                    the selected date range.
+
+                </div>
+
+            </div>
+
+
+        {% endif %}
+
+
+        <!-- ============================================= -->
+        <!-- SIGNATURE -->
+        <!-- ============================================= -->
+
+        <div class="signature-section">
+
+            <div class="signature-box">
+
+
+                <!-- SPACE ABOVE THIS LINE IS FOR SIGNATURE -->
+
+                <div class="signature-line"></div>
+
+
+                <div class="signature-name">
+
+                    {% if user.get_full_name %}
+
+                        {{ user.get_full_name }}
+
+                    {% else %}
+
+                        {{ user.username }}
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="signature-role">
+
+                    {{ user.get_role_display }}
+
+                </div>
+
+
+                <div class="signature-label">
+
+                    Signature over Printed Name
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================================= -->
+        <!-- FOOTNOTE -->
+        <!-- ============================================= -->
+
+        <div class="report-footnote">
+
+            BARMM Digital Call Center Ticketing System
+            &nbsp;•&nbsp;
+            Personnel Ticket History Report
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+{% endblock %}

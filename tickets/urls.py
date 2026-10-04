@@ -7,4 +7,9 @@ urlpatterns = [
     path("tickets/new/", views.ticket_create, name="ticket_create"),
     path("tickets/<int:pk>/", views.ticket_detail, name="ticket_detail"),
     path("personnel-records/", views.personnel_ticket_records, name="personnel_ticket_records",),
+    path(
+    "my-history-report/",
+    views.my_ticket_history_report,
+    name="my_ticket_history_report",
+),
 ]

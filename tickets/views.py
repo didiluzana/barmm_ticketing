@@ -1761,3 +1761,208 @@ def get_user_display_name(user):
         return full_name
 
     return user.username
+
+
+@login_required
+def my_ticket_history_report(request):
+
+    allowed_roles = [
+        User.Role.AGENT,
+        User.Role.IT,
+        User.Role.TECHNICIAN,
+        User.Role.ELECTRICIAN,
+    ]
+
+    if request.user.role not in allowed_roles:
+        messages.error(
+            request,
+            (
+                "This report is available only to "
+                "Call Center Agents, IT personnel, "
+                "Technicians, and Electricians."
+            ),
+        )
+        return redirect("dashboard")
+
+    date_from = request.GET.get(
+        "date_from",
+        "",
+    ).strip()
+
+    date_to = request.GET.get(
+        "date_to",
+        "",
+    ).strip()
+
+    # =====================================================
+    # GET USER'S OWN TICKETS
+    # =====================================================
+
+    if request.user.role == User.Role.AGENT:
+
+        tickets = Ticket.objects.filter(
+            logged_by=request.user
+        )
+
+    else:
+
+        tickets = (
+            Ticket.objects
+            .filter(
+                Q(
+                    assigned_to=request.user
+                )
+                |
+                Q(
+                    status_history__assigned_to=request.user
+                )
+            )
+            .distinct()
+        )
+
+    # =====================================================
+    # PROVINCE SAFETY
+    # =====================================================
+
+    if request.user.province_id:
+        tickets = tickets.filter(
+            province=request.user.province
+        )
+    else:
+        tickets = tickets.none()
+
+    # =====================================================
+    # DATE FILTER
+    # =====================================================
+
+    if date_from:
+        tickets = tickets.filter(
+            created_at__date__gte=date_from
+        )
+
+    if date_to:
+        tickets = tickets.filter(
+            created_at__date__lte=date_to
+        )
+
+    # =====================================================
+    # RELATED DATA
+    # =====================================================
+
+    tickets = (
+        tickets
+        .select_related(
+            "province",
+            "category",
+            "assigned_to",
+            "logged_by",
+        )
+        .prefetch_related(
+            "status_history",
+            "status_history__assigned_to",
+            "status_history__changed_by",
+        )
+        .order_by("created_at")
+    )
+
+    # =====================================================
+    # STATUS COUNTS
+    # =====================================================
+
+    total_count = tickets.count()
+
+    new_count = tickets.filter(
+        status=Ticket.Status.NEW
+    ).count()
+
+    assigned_count = tickets.filter(
+        status=Ticket.Status.ASSIGNED
+    ).count()
+
+    in_progress_count = tickets.filter(
+        status=Ticket.Status.IN_PROGRESS
+    ).count()
+
+    pending_count = tickets.filter(
+        status=Ticket.Status.PENDING
+    ).count()
+
+    reopened_count = tickets.filter(
+        status=Ticket.Status.REOPENED
+    ).count()
+
+    resolved_count = tickets.filter(
+        status=Ticket.Status.RESOLVED
+    ).count()
+
+    closed_count = tickets.filter(
+        status=Ticket.Status.CLOSED
+    ).count()
+
+    # =====================================================
+    # PERSON'S CONNECTION TO EACH TICKET
+    # =====================================================
+
+    for ticket in tickets:
+
+        connections = []
+
+        if ticket.logged_by_id == request.user.id:
+            connections.append(
+                "Logged Ticket"
+            )
+
+        if ticket.assigned_to_id == request.user.id:
+            connections.append(
+                "Currently Assigned"
+            )
+
+        previously_assigned = False
+
+        for history in ticket.status_history.all():
+
+            if history.assigned_to_id == request.user.id:
+                previously_assigned = True
+                break
+
+        if (
+            previously_assigned
+            and ticket.assigned_to_id != request.user.id
+        ):
+            connections.append(
+                "Previously Assigned"
+            )
+
+        if not connections:
+            connections.append(
+                "Ticket Activity"
+            )
+
+        ticket.personnel_connection = (
+            " / ".join(connections)
+        )
+
+    # =====================================================
+    # CONTEXT
+    # =====================================================
+
+    context = {
+        "tickets": tickets,
+        "date_from": date_from,
+        "date_to": date_to,
+
+        "total_count": total_count,
+        "new_count": new_count,
+        "assigned_count": assigned_count,
+        "in_progress_count": in_progress_count,
+        "pending_count": pending_count,
+        "reopened_count": reopened_count,
+        "resolved_count": resolved_count,
+        "closed_count": closed_count,
+    }
+
+    return render(
+        request,
+        "tickets/my_ticket_history_report.html",
+        context,
+    )
